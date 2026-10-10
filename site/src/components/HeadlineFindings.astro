@@ -4,7 +4,7 @@
 import Chapter from './Chapter.astro';
 import { findings } from '../data/findings';
 import { applyPatch, defaultSelection, serialiseSelection, type SelectionPatch } from '../selection';
-import { CLERICAL_SECTOR, findingFacts, wordingProblems } from '../findings/facts';
+import { CLERICAL_SECTOR, findingFacts, WOMEN_FINDING_LINK, wordingProblems } from '../findings/facts';
 import { netChange, replacementRate, share, wholeShare } from '../findings/format';
 import DisplacementLines from '../findings/DisplacementLines.astro';
 import SectorGapBars from '../findings/SectorGapBars.astro';
@@ -121,7 +121,7 @@ const explorerQuery = (patch: SelectionPatch) =>
     title="Women in clerical work"
     chartTitle="One Sector stands apart"
     chartSubtitle="Women's share of the workforce and of displaced roles, by Sector"
-    explorerQuery={explorerQuery({ metric: 'women-share', sector: CLERICAL_SECTOR })}
+    explorerQuery={explorerQuery(WOMEN_FINDING_LINK)}
   >
     <p>{text.women}</p>
     <p>{text.otherSectors}</p>

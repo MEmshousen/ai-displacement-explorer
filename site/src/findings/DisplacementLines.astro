@@ -4,7 +4,8 @@
 import { scaleLinear, scalePoint } from 'd3-scale';
 import { line } from 'd3-shape';
 import { findings } from '../data/findings';
-import { netChange, quarterLabel, share, wholeShare } from './format';
+import { quarterLabel } from '../selection';
+import { netChange, share, wholeShare } from './format';
 import './chart.css';
 
 const { trend, periods, headline } = findings;

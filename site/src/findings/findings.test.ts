@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { Findings } from '../data/shape';
-import { CLERICAL_SECTOR, findingFacts, wordingProblems, yearlyAverages } from './facts';
+import { CLERICAL_SECTOR, findingFacts, WOMEN_FINDING_LINK, wordingProblems, yearlyAverages } from './facts';
 import {
   incomeGroupLabel,
   netChange,
   pointGap,
-  quarterLabel,
   replacementRate,
   share,
   signedPoints,
@@ -73,9 +72,14 @@ describe('formats', () => {
     expect(signedPoints(0)).toBe('0 pts');
   });
 
-  it('writes income groups in sentence case and quarters without the hyphen', () => {
+  it('writes income groups in sentence case', () => {
     expect(incomeGroupLabel('Upper Middle Income')).toBe('Upper middle income');
-    expect(quarterLabel('2026-Q2')).toBe('2026 Q2');
+  });
+});
+
+describe('the fourth finding\'s Explorer link', () => {
+  it('opens women\'s share with all Sectors, so the Sector bars show the contrast', () => {
+    expect(WOMEN_FINDING_LINK).toEqual({ metric: 'women-share' });
   });
 });
 

@@ -8,7 +8,7 @@
 
 import { scaleLinear } from 'd3-scale';
 import { PHONE_QUERY, type ExplorerPage } from '../page';
-import { formatMetric, getMetric, type Selection } from '../../selection';
+import { formatMetric, getMetric, quarterLabel, type Selection } from '../../selection';
 import { endLabelRoom, formatTick, linePath, NARROW_CHART, spreadLabels, yAxis, yearTicks } from './layout';
 import {
   endLabel,
@@ -177,7 +177,7 @@ export function mountTrendChart(root: HTMLElement, { explorer, store }: Explorer
     const ruleLabel = svgEl('text', { class: 'trend-rule-label', y: top - 9, 'text-anchor': 'middle' });
     rule.append(svgEl('line', { class: 'trend-rule', y1: top - 5, y2: bottom }), ruleLabel);
     svg.append(rule);
-    const half = measure(quarters[0], 'trend-rule-label') / 2;
+    const half = measure(quarterLabel(quarters[0]), 'trend-rule-label') / 2;
 
     // A label at the end of each line, moved apart where the lines end close together.
     const ends = lines.map((line) => {
@@ -257,7 +257,7 @@ export function mountTrendChart(root: HTMLElement, { explorer, store }: Explorer
 
     const ruleX = x(selected);
     drawn.rule.setAttribute('transform', `translate(${ruleX},0)`);
-    drawn.ruleLabel.textContent = quarters[selected];
+    drawn.ruleLabel.textContent = quarterLabel(quarters[selected]);
     // Keep the quarter's label inside the chart at either end of the range.
     const [from, to] = drawn.ruleLabelRange;
     drawn.ruleLabel.setAttribute('x', String(round(Math.max(from, Math.min(to, ruleX)) - ruleX)));
@@ -281,7 +281,7 @@ export function mountTrendChart(root: HTMLElement, { explorer, store }: Explorer
       }
       drawn!.readoutValues[position].textContent = formatMetric(selection.metric, value);
     });
-    drawn.readoutQuarter.textContent = quarters[index];
+    drawn.readoutQuarter.textContent = quarterLabel(quarters[index]);
 
     if (reading === null) scrubber.value = String(selected);
     scrubber.setAttribute('aria-valuetext', readoutText(selection, lines, quarters, index));

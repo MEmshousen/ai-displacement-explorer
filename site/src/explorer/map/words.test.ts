@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { countryLabel, mapHint, mapSubtitle, mapSummary, mapTitle } from './words';
+import { countryLabel, mapHint, mapSubtitle, mapSummary, mapTitle, playHint } from './words';
 
 const all = { metric: 'displacement', sector: null, quarter: '2026-Q2' } as const;
 
 describe('mapTitle', () => {
   it('names the metric, the Sector and the quarter', () => {
-    expect(mapTitle(all)).toBe('Displacement in all Sectors, 2026-Q2');
+    expect(mapTitle(all)).toBe('Displacement in all Sectors, 2026 Q2');
     expect(mapTitle({ metric: 'net-change', sector: 'Finance & Banking', quarter: '2021-Q3' })).toBe(
-      'Net change in Finance & Banking, 2021-Q3',
+      'Net change in Finance & Banking, 2021 Q3',
     );
   });
 });
@@ -46,24 +46,37 @@ describe('mapSummary', () => {
 
   it('names the highest and lowest countries and counts those with a value', () => {
     expect(mapSummary(all, countries, 2)).toBe(
-      'Displacement in all Sectors, 2026-Q2. Highest: Bland (9.0%), Fland (7.0%). ' +
+      'Displacement in all Sectors, 2026 Q2. Highest: Bland (9.0%), Fland (7.0%). ' +
         'Lowest: Aland (1.0%), Eland (3.0%). 5 countries have a value; every other country is shown as no data.',
     );
   });
 
   it('never names a country at both ends', () => {
     expect(mapSummary(all, countries.slice(0, 3))).toBe(
-      'Displacement in all Sectors, 2026-Q2. Highest: Bland (9.0%). Lowest: Aland (1.0%). ' +
+      'Displacement in all Sectors, 2026 Q2. Highest: Bland (9.0%). Lowest: Aland (1.0%). ' +
         '3 countries have a value; every other country is shown as no data.',
     );
   });
 
   it('copes with one country and with none', () => {
     expect(mapSummary(all, countries.slice(0, 1))).toBe(
-      'Displacement in all Sectors, 2026-Q2. Aland (1.0%). 1 country has a value; every other country is shown as no data.',
+      'Displacement in all Sectors, 2026 Q2. Aland (1.0%). 1 country has a value; every other country is shown as no data.',
     );
     expect(mapSummary(all, [{ name: 'Dland', value: null }])).toBe(
-      'Displacement in all Sectors, 2026-Q2. No country has a value.',
+      'Displacement in all Sectors, 2026 Q2. No country has a value.',
     );
+  });
+});
+
+describe('playHint', () => {
+  const quarters = ['2020-Q1', '2020-Q2', '2026-Q1', '2026-Q2'];
+
+  it('invites the visitor to play from the first year when the latest quarter is showing', () => {
+    expect(playHint(quarters, '2026-Q2')).toBe('Press play to watch the map change from 2020.');
+  });
+
+  it('says nothing at any other quarter, where Play carries on instead of starting again', () => {
+    expect(playHint(quarters, '2020-Q1')).toBe('');
+    expect(playHint(quarters, '2026-Q1')).toBe('');
   });
 });

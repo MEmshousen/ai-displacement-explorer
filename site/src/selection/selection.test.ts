@@ -5,6 +5,7 @@ import {
   applyPatch,
   defaultSelection,
   parseSelection,
+  quarterLabel,
   sectorSlug,
   serialiseSelection,
   type Selection,
@@ -262,5 +263,12 @@ describe('units and number formats', () => {
   it('writes "No value" where there is none', () => {
     expect(formatMetric('replacement-rate', null)).toBe(NO_VALUE);
     expect(NO_VALUE).toBe('No value');
+  });
+});
+
+describe('quarterLabel', () => {
+  it('writes a quarter for a person to read, without the hyphen', () => {
+    expect(quarterLabel('2026-Q2')).toBe('2026 Q2');
+    expect(quarterLabel('2020-Q1')).toBe('2020 Q1');
   });
 });

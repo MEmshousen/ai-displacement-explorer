@@ -1,7 +1,7 @@
 // The words of the Selection sentence, and the lists its pickers offer. Pure: no DOM here, so the
 // sentence can be checked to read naturally in every state.
 
-import { MAX_PINNED, type MetricId, type Selection } from '../../selection';
+import { MAX_PINNED, quarterLabel, type MetricId, type Selection } from '../../selection';
 
 /** The four parts of the Selection a word in the sentence stands for. */
 export type SentenceField = 'metric' | 'sector' | 'quarter' | 'country';
@@ -52,7 +52,7 @@ export function sentence(selection: Selection, countryName?: string): Sentence {
     words: {
       metric: word,
       sector: selection.sector ?? ALL_SECTORS,
-      quarter: selection.quarter,
+      quarter: quarterLabel(selection.quarter),
       country: selection.country === null ? NO_COUNTRY : (countryName ?? selection.country),
     },
     gaps: [lead, ' in ', ' for ', ', with ', ' selected.'],
@@ -70,13 +70,13 @@ export interface ChoiceGroup {
   readonly choices: readonly { readonly value: string; readonly label: string }[];
 }
 
-/** The quarters grouped by year, in the order given: "2024" holding 2024-Q1 to 2024-Q4. */
+/** The quarters grouped by year, in the order given: "2024" holding 2024 Q1 to 2024 Q4. */
 export function quartersByYear(quarters: readonly string[]): ChoiceGroup[] {
   const groups = new Map<string, { value: string; label: string }[]>();
   for (const quarter of quarters) {
     const year = quarter.slice(0, 4);
     if (!groups.has(year)) groups.set(year, []);
-    groups.get(year)!.push({ value: quarter, label: quarter });
+    groups.get(year)!.push({ value: quarter, label: quarterLabel(quarter) });
   }
   return [...groups].map(([label, choices]) => ({ label, choices }));
 }

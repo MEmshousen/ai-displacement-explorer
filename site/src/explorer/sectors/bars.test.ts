@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { getMetric } from '../../selection';
-import { barScale, fixedDomain, rankSectors, viewHint, viewSubtitle, viewTitle } from './bars';
+import { METRICS, getMetric } from '../../selection';
+import { barScale, fixedDomain, rankOrder, rankSectors, viewHint, viewSubtitle, viewTitle } from './bars';
 
 describe('rankSectors', () => {
   it('ranks from the highest value to the lowest', () => {
@@ -19,6 +19,24 @@ describe('rankSectors', () => {
       { sector: 'Energy', value: -0.02 },
     ];
     expect(rankSectors(values)).toEqual(['Retail', 'Energy', 'Finance']);
+  });
+
+  it('ranks from the lowest value when asked, the largest loss first', () => {
+    const values = [
+      { sector: 'Finance', value: -0.02 },
+      { sector: 'Retail', value: 0.01 },
+      { sector: 'Energy', value: -0.06 },
+      { sector: 'Media', value: null },
+    ];
+    expect(rankSectors(values, [], 'lowest first')).toEqual(['Energy', 'Finance', 'Retail', 'Media']);
+  });
+
+  it('keeps tied Sectors in the earlier order when ranking from the lowest', () => {
+    const values = [
+      { sector: 'Finance', value: -0.02 },
+      { sector: 'Retail', value: -0.02 },
+    ];
+    expect(rankSectors(values, ['Retail', 'Finance'], 'lowest first')).toEqual(['Retail', 'Finance']);
   });
 
   it('puts Sectors with no value last', () => {
@@ -116,13 +134,21 @@ describe('barScale', () => {
   });
 });
 
+describe('rankOrder', () => {
+  it('ranks Net change from the lowest and every other metric from the highest', () => {
+    for (const { id } of METRICS) {
+      expect(rankOrder(id)).toBe(id === 'net-change' ? 'lowest first' : 'highest first');
+    }
+  });
+});
+
 describe('the pane text', () => {
   it('titles the pane with the country and quarter', () => {
-    expect(viewTitle('Germany', '2026-Q2')).toBe('Sectors in Germany, 2026-Q2');
+    expect(viewTitle('Germany', '2026-Q2')).toBe('Sectors in Germany, 2026 Q2');
   });
 
   it('names the global average when no country is selected', () => {
-    expect(viewTitle(null, '2024-Q3')).toBe('Sectors, global average, 2024-Q3');
+    expect(viewTitle(null, '2024-Q3')).toBe('Sectors, global average, 2024 Q3');
   });
 
   it('says what the metric counts and which way the ranking runs', () => {
@@ -132,6 +158,7 @@ describe('the pane text', () => {
     expect(viewSubtitle(getMetric('replacement-rate'))).toBe(
       'Replacement rate (new roles per 100 displaced), highest first',
     );
+    expect(viewSubtitle(getMetric('net-change'))).toBe('Net change (% of the Sector workforce), lowest first');
   });
 
   it('says how to choose a Sector and how to return to all Sectors', () => {
