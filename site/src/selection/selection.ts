@@ -38,6 +38,14 @@ export interface SelectionPatch {
   readonly pinned?: readonly string[];
 }
 
+/**
+ * A quarter as a person reads it: "2026-Q2" as "2026 Q2". The Selection, the data and the URL keep
+ * the hyphenated form; every view and Headline finding writes quarters through this.
+ */
+export function quarterLabel(quarter: string): string {
+  return quarter.replace('-', ' ');
+}
+
 /** "YYYY-Qn" labels sort chronologically as plain strings. */
 export function latestQuarter(choices: ValidChoices): string {
   const latest = [...choices.quarters].sort().at(-1);

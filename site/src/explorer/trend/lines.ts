@@ -2,7 +2,7 @@
 // title and subtitle, and the text alternative. No DOM here, so all of it is unit tested.
 
 import type { Explorer } from '../../data/explorer';
-import { formatMetric, getMetric, type Selection } from '../../selection';
+import { formatMetric, getMetric, quarterLabel, type Selection } from '../../selection';
 
 export const GLOBAL_AVERAGE = 'Global average';
 
@@ -114,18 +114,18 @@ export function trendTitle(lines: readonly TrendLine[]): string {
   return 'The global average over time';
 }
 
-/** The pane's subtitle: "Displacement, Finance & Banking, 2020-Q1 to 2026-Q2". */
+/** The pane's subtitle: "Displacement, Finance & Banking, 2020 Q1 to 2026 Q2". */
 export function trendSubtitle(
   selection: Pick<Selection, 'metric' | 'sector'>,
   quarters: readonly string[],
 ): string {
   const { label } = getMetric(selection.metric);
-  return `${label}, ${selection.sector ?? 'all Sectors'}, ${quarters[0]} to ${quarters.at(-1)}`;
+  return `${label}, ${selection.sector ?? 'all Sectors'}, ${quarterLabel(quarters[0])} to ${quarterLabel(quarters.at(-1)!)}`;
 }
 
 /**
  * The chart's text alternative: what is charted, then where each line starts and ends.
- * "Germany: 3.1% in 2020-Q1, 11.8% in 2026-Q2."
+ * "Germany: 3.1% in 2020 Q1, 11.8% in 2026 Q2."
  */
 export function trendSummary(
   selection: Pick<Selection, 'metric' | 'sector'>,
@@ -143,7 +143,7 @@ export function trendSummary(
       continue;
     }
     const at = (index: number) =>
-      `${formatMetric(selection.metric, line.values[index])} in ${quarters[index]}`;
+      `${formatMetric(selection.metric, line.values[index])} in ${quarterLabel(quarters[index])}`;
     parts.push(`${line.name}: ${first === last ? at(first) : `${at(first)}, ${at(last)}`}.`);
   }
   return parts.join(' ');
@@ -157,5 +157,5 @@ export function readoutText(
   index: number,
 ): string {
   const values = lines.map((line) => `${line.name} ${formatMetric(selection.metric, line.values[index])}`);
-  return `${quarters[index]}: ${values.join(', ')}`;
+  return `${quarterLabel(quarters[index])}: ${values.join(', ')}`;
 }

@@ -2,7 +2,8 @@
 // Selection with { history: 'replace' }, so back does not step through every quarter.
 
 import { explorerPage } from '../page';
-import type { Selection } from '../../selection';
+import { quarterLabel, type Selection } from '../../selection';
+import { playHint } from './words';
 
 /** How long each quarter stays on screen while playing. */
 const STEP_MS = 700;
@@ -10,6 +11,7 @@ const STEP_MS = 700;
 export async function mountSlider(root: HTMLElement): Promise<void> {
   const input = root.querySelector<HTMLInputElement>('[data-quarter-input]')!;
   const now = root.querySelector<HTMLElement>('[data-quarter-now]')!;
+  const hint = root.querySelector<HTMLElement>('[data-play-hint]')!;
   const button = root.querySelector<HTMLButtonElement>('[data-play]')!;
   const icon = root.querySelector<HTMLElement>('[data-play-icon]')!;
   const label = root.querySelector<HTMLElement>('[data-play-label]')!;
@@ -50,8 +52,9 @@ export async function mountSlider(root: HTMLElement): Promise<void> {
   const render = (selection: Selection) => {
     if (timer !== undefined && selection.quarter !== played) stop();
     input.value = String(quarters.indexOf(selection.quarter));
-    input.setAttribute('aria-valuetext', selection.quarter);
-    now.textContent = selection.quarter;
+    input.setAttribute('aria-valuetext', quarterLabel(selection.quarter));
+    now.textContent = quarterLabel(selection.quarter);
+    hint.textContent = playHint(quarters, selection.quarter);
   };
 
   input.addEventListener('input', () => {

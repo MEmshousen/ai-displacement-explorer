@@ -4,7 +4,16 @@
 
 import { formatMetric, getMetric, type MetricId, type Selection } from '../../selection';
 import type { ExplorerPage } from '../page';
-import { barScale, fixedDomain, rankSectors, viewHint, viewSubtitle, viewTitle, type BarScale } from './bars';
+import {
+  barScale,
+  fixedDomain,
+  rankOrder,
+  rankSectors,
+  viewHint,
+  viewSubtitle,
+  viewTitle,
+  type BarScale,
+} from './bars';
 
 /** How long the ranking must hold still before the rows are put in that order in the document. */
 const SETTLE_MS = 400;
@@ -116,7 +125,7 @@ export function mountSectorBars(root: HTMLElement, { explorer, store }: Explorer
 
     const values = explorer.bySector(selection);
     const scale = scaleFor(metric, country);
-    order = rankSectors(values, order);
+    order = rankSectors(values, order, rankOrder(metric));
 
     property(list, '--zero', String(scale.zero));
     order.forEach((name, rank) => property(rows.get(name)!.item, '--rank', String(rank)));

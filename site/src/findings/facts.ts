@@ -2,10 +2,18 @@
 // the agreed wording ("tripled", "less than a third", "rise with income") still describes them.
 
 import type { Findings } from '../data/shape';
+import type { SelectionPatch } from '../selection';
 import { pointGap } from './format';
 
 /** The Sector the fourth Headline finding is about. */
 export const CLERICAL_SECTOR = 'Administrative & Clerical';
+
+/**
+ * What the fourth finding's "See this in the Explorer" link opens: women's share with all Sectors,
+ * so the Sector bars show the Sector standing apart. Choosing the Sector itself would leave every
+ * country with the same value and the map one flat colour.
+ */
+export const WOMEN_FINDING_LINK: SelectionPatch = { metric: 'women-share' };
 
 type SectorRow = Findings['sectors'][number];
 type IncomeGroupRow = Findings['incomeGroups'][number];

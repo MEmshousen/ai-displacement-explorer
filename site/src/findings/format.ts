@@ -39,8 +39,3 @@ export function signedPoints(points: number): string {
 export function incomeGroupLabel(incomeGroup: string): string {
   return incomeGroup.charAt(0) + incomeGroup.slice(1).toLowerCase();
 }
-
-/** "2026-Q2" as "2026 Q2", for visible text. */
-export function quarterLabel(quarter: string): string {
-  return quarter.replace('-', ' ');
-}

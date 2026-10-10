@@ -2,10 +2,12 @@
 // The quarter slider under the map: a native range input over the dataset's quarters, the current
 // quarter beside it, and a play button that steps to the latest quarter and stops there.
 import { findings } from '../../data/findings';
+import { quarterLabel } from '../../selection';
+import { playHint } from './words';
 
 const { quarters } = findings.choices;
-const first = quarters[0];
-const last = quarters[quarters.length - 1];
+const first = quarterLabel(quarters[0]);
+const last = quarterLabel(quarters[quarters.length - 1]);
 ---
 
 <div class="slider" data-quarter-slider>
@@ -34,6 +36,8 @@ const last = quarters[quarters.length - 1];
   </div>
 
   <output class="now" for="explorer-quarter" data-quarter-now>{last}</output>
+
+  <p class="hint" data-play-hint>{playHint(quarters, quarters[quarters.length - 1])}</p>
 </div>
 
 <style>
@@ -100,6 +104,15 @@ const last = quarters[quarters.length - 1];
     line-height: 2rem;
     color: var(--chart-text-strong);
     text-align: right;
+  }
+
+  /* Under the controls, like the hint under the map. Keeps its line when it has nothing to say. */
+  .hint {
+    grid-column: 1 / -1;
+    min-height: 1.25em;
+    font-size: var(--text-xs);
+    line-height: 1.25;
+    color: var(--chart-text-muted);
   }
 
   /* Touch widths, and any touch screen: 44px targets. */

@@ -24,24 +24,24 @@ const text = (selection: Selection, countryName?: string) => sentenceText(senten
 describe('sentence', () => {
   it('reads naturally with a country selected', () => {
     expect(text({ ...base, country: 'DEU' }, 'Germany')).toBe(
-      'Showing Displacement in all Sectors for 2026-Q2, with Germany selected.',
+      'Showing Displacement in all Sectors for 2026 Q2, with Germany selected.',
     );
   });
 
   it('reads naturally with no country and one Sector', () => {
     expect(text({ ...base, sector: 'Finance & Banking', quarter: '2021-Q3' })).toBe(
-      'Showing Displacement in Finance & Banking for 2021-Q3, with no country selected.',
+      'Showing Displacement in Finance & Banking for 2021 Q3, with no country selected.',
     );
   });
 
   it('reads naturally for each of the six metrics', () => {
     expect(METRICS.map(({ id }) => text({ ...base, metric: id }))).toEqual([
-      'Showing Displacement in all Sectors for 2026-Q2, with no country selected.',
-      'Showing Net change in all Sectors for 2026-Q2, with no country selected.',
-      'Showing the Replacement rate in all Sectors for 2026-Q2, with no country selected.',
-      'Showing the AI adoption index in all Sectors for 2026-Q2, with no country selected.',
-      'Showing the AI skills wage premium in all Sectors for 2026-Q2, with no country selected.',
-      "Showing women's share of displaced roles in all Sectors for 2026-Q2, with no country selected.",
+      'Showing Displacement in all Sectors for 2026 Q2, with no country selected.',
+      'Showing Net change in all Sectors for 2026 Q2, with no country selected.',
+      'Showing the Replacement rate in all Sectors for 2026 Q2, with no country selected.',
+      'Showing the AI adoption index in all Sectors for 2026 Q2, with no country selected.',
+      'Showing the AI skills wage premium in all Sectors for 2026 Q2, with no country selected.',
+      "Showing women's share of displaced roles in all Sectors for 2026 Q2, with no country selected.",
     ]);
   });
 
@@ -60,11 +60,11 @@ describe('quartersByYear', () => {
       {
         label: '2025',
         choices: [
-          { value: '2025-Q3', label: '2025-Q3' },
-          { value: '2025-Q4', label: '2025-Q4' },
+          { value: '2025-Q3', label: '2025 Q3' },
+          { value: '2025-Q4', label: '2025 Q4' },
         ],
       },
-      { label: '2026', choices: [{ value: '2026-Q1', label: '2026-Q1' }] },
+      { label: '2026', choices: [{ value: '2026-Q1', label: '2026 Q1' }] },
     ]);
   });
 });

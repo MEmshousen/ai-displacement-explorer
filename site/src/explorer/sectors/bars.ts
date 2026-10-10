@@ -2,7 +2,7 @@
 // here touches the page; `view.ts` does the drawing.
 
 import { scaleLinear } from 'd3-scale';
-import type { Metric } from '../../selection';
+import { quarterLabel, type Metric, type MetricId } from '../../selection';
 
 /** One Sector's value, as `explorer.bySector()` gives it. Null is "no value". */
 export interface SectorValue {
@@ -12,12 +12,28 @@ export interface SectorValue {
 
 const hasValue = (value: number | null): value is number => value !== null && Number.isFinite(value);
 
+/** Which way a ranking runs. */
+export type RankOrder = 'highest first' | 'lowest first';
+
 /**
- * The Sector names from the highest value to the lowest, with "no value" last. Sectors that tie
- * keep the order they had in `previous` (the ranking before this one), so two equal bars do not
- * swap back and forth while the quarter plays; with no previous ranking they keep the given order.
+ * The order that puts the most affected Sector at the top: Net change runs from the lowest value,
+ * the most roles lost, and every other metric from the highest.
  */
-export function rankSectors(values: readonly SectorValue[], previous: readonly string[] = []): string[] {
+export function rankOrder(metric: MetricId): RankOrder {
+  return metric === 'net-change' ? 'lowest first' : 'highest first';
+}
+
+/**
+ * The Sector names ranked in the given order, with "no value" last. Sectors that tie keep the
+ * order they had in `previous` (the ranking before this one), so two equal bars do not swap back
+ * and forth while the quarter plays; with no previous ranking they keep the given order.
+ */
+export function rankSectors(
+  values: readonly SectorValue[],
+  previous: readonly string[] = [],
+  order: RankOrder = 'highest first',
+): string[] {
+  const direction = order === 'lowest first' ? -1 : 1;
   const before = (sector: string, fallback: number): number => {
     const index = previous.indexOf(sector);
     return index === -1 ? previous.length + fallback : index;
@@ -25,7 +41,7 @@ export function rankSectors(values: readonly SectorValue[], previous: readonly s
   return values
     .map(({ sector, value }, index) => ({ sector, value, tie: before(sector, index) }))
     .sort((a, b) => {
-      if (hasValue(a.value) && hasValue(b.value) && a.value !== b.value) return b.value - a.value;
+      if (hasValue(a.value) && hasValue(b.value) && a.value !== b.value) return direction * (b.value - a.value);
       if (hasValue(a.value) !== hasValue(b.value)) return hasValue(a.value) ? -1 : 1;
       return a.tie - b.tie;
     })
@@ -80,19 +96,19 @@ export function barScale(domain: Domain): BarScale {
   };
 }
 
-/** The pane's title: "Sectors in Germany, 2026-Q2". With no country it names the global average. */
+/** The pane's title: "Sectors in Germany, 2026 Q2". With no country it names the global average. */
 export function viewTitle(countryName: string | null, quarter: string): string {
   return countryName === null
-    ? `Sectors, global average, ${quarter}`
-    : `Sectors in ${countryName}, ${quarter}`;
+    ? `Sectors, global average, ${quarterLabel(quarter)}`
+    : `Sectors in ${countryName}, ${quarterLabel(quarter)}`;
 }
 
 /**
  * The pane's subtitle: the metric, what its values count, and which way the ranking runs. A phrase
  * with no full stop, like the other panes' subtitles.
  */
-export function viewSubtitle(metric: Pick<Metric, 'label' | 'unit'>): string {
-  return `${metric.label} (${metric.unit}), highest first`;
+export function viewSubtitle(metric: Pick<Metric, 'id' | 'label' | 'unit'>): string {
+  return `${metric.label} (${metric.unit}), ${rankOrder(metric.id)}`;
 }
 
 /** The line under the bars saying what choosing a bar does. */

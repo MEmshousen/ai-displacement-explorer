@@ -130,9 +130,9 @@ describe('trendTitle', () => {
 
 describe('trendSubtitle', () => {
   it('gives the metric, the Sector and the range of quarters', () => {
-    expect(trendSubtitle(selection(), quarters)).toBe('Displacement, all Sectors, 2020-Q1 to 2020-Q3');
+    expect(trendSubtitle(selection(), quarters)).toBe('Displacement, all Sectors, 2020 Q1 to 2020 Q3');
     expect(trendSubtitle(selection({ metric: 'net-change', sector: 'Finance & Banking' }), quarters)).toBe(
-      'Net change, Finance & Banking, 2020-Q1 to 2020-Q3',
+      'Net change, Finance & Banking, 2020 Q1 to 2020 Q3',
     );
   });
 });
@@ -141,8 +141,8 @@ describe('trendSummary', () => {
   it('says where each line starts and ends', () => {
     const lines = trendLines(selection({ country: 'DEU' }), explorer);
     expect(trendSummary(selection(), lines, quarters)).toBe(
-      'Line chart. Displacement, all Sectors, 2020-Q1 to 2020-Q3, in % of the Sector workforce. ' +
-        'Germany: 1.0% in 2020-Q1, 1.2% in 2020-Q3. Global average: 0.0% in 2020-Q1, 0.2% in 2020-Q3.',
+      'Line chart. Displacement, all Sectors, 2020 Q1 to 2020 Q3, in % of the Sector workforce. ' +
+        'Germany: 1.0% in 2020 Q1, 1.2% in 2020 Q3. Global average: 0.0% in 2020 Q1, 0.2% in 2020 Q3.',
     );
   });
 
@@ -153,7 +153,7 @@ describe('trendSummary', () => {
       { ...base[1], values: [null, null, null] },
     ];
     const summary = trendSummary(selection({ metric: 'replacement-rate' }), lines, quarters);
-    expect(summary).toContain('Germany: 40 in 2020-Q2.');
+    expect(summary).toContain('Germany: 40 in 2020 Q2.');
     expect(summary).toContain('Global average: no value in any quarter.');
   });
 });
@@ -161,6 +161,6 @@ describe('trendSummary', () => {
 describe('readoutText', () => {
   it("reads every line's value at one quarter", () => {
     const lines = trendLines(selection({ country: 'DEU' }), explorer);
-    expect(readoutText(selection(), lines, quarters, 1)).toBe('2020-Q2: Germany 1.1%, Global average 0.1%');
+    expect(readoutText(selection(), lines, quarters, 1)).toBe('2020 Q2: Germany 1.1%, Global average 0.1%');
   });
 });
