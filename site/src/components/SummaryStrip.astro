@@ -1,6 +1,11 @@
 ---
 // The four-number summary strip. Each item links to its chapter.
 // A figure is a list of parts; the part marked `accent` is the number the finding turns on.
+// Every number comes from the findings data.
+import { findings } from '../data/findings';
+import { findingFacts } from '../findings/facts';
+import { netChange, replacementRate, share, wholeShare } from '../findings/format';
+
 interface Part {
   text: string;
   accent?: boolean;
@@ -12,29 +17,44 @@ interface Item {
   text: string;
 }
 
+const { displacement, netChange: net } = findings.headline;
+const facts = findingFacts(findings);
+
 const items: Item[] = [
   {
     href: '#finding-1',
     label: 'Over time',
-    figure: [{ text: '2.7% → ' }, { text: '8.7%', accent: true }],
-    text: 'Displacement tripled; Net change fell from −0.9% to −3.3%.',
+    figure: [
+      { text: `${share(displacement.baseline)} → ` },
+      { text: share(displacement.latest), accent: true },
+    ],
+    text: `Displacement tripled; Net change fell from ${netChange(net.baseline)} to ${netChange(net.latest)}.`,
   },
   {
     href: '#finding-2',
     label: 'By Sector',
-    figure: [{ text: '14.2%', accent: true }, { text: ' vs 3.3%' }],
-    text: 'Administrative & Clerical at the top, Healthcare & Life Sciences at the bottom.',
+    figure: [
+      { text: share(facts.topSector.displacement), accent: true },
+      { text: ` vs ${share(facts.lowestSector.displacement)}` },
+    ],
+    text: `${facts.topSector.sector} at the top, ${facts.lowestSector.sector} at the bottom.`,
   },
   {
     href: '#finding-3',
     label: 'By income group',
-    figure: [{ text: '13.1%', accent: true }, { text: ', 75 per 100' }],
+    figure: [
+      { text: share(facts.highIncome.displacement), accent: true },
+      { text: `, ${replacementRate(facts.highIncome.replacementRate)} per 100` },
+    ],
     text: 'Rich countries lose more but recover more.',
   },
   {
     href: '#finding-4',
     label: 'By gender',
-    figure: [{ text: '79% → ' }, { text: '95%', accent: true }],
+    figure: [
+      { text: `${wholeShare(facts.clerical.workforce)} → ` },
+      { text: wholeShare(facts.clerical.displaced), accent: true },
+    ],
     text: "Women's share of clerical workforce against their share of its displaced roles.",
   },
 ];

@@ -1,0 +1,113 @@
+---
+// Headline finding 2's chart: Displacement for the ten Sectors in the latest four quarters, ranked,
+// with the top Sector emphasised. Static SVG, drawn at build time.
+import { scaleLinear } from 'd3-scale';
+import { findings } from '../data/findings';
+import { share } from './format';
+import './chart.css';
+
+const { sectors } = findings;
+const highest = Math.max(...sectors.map((row) => row.displacement));
+
+// Wide: Sector names in a column to the left of the bars. Narrow: each name on its own line above
+// its bar, so no name is squeezed or cut.
+const sizes = [
+  { name: 'wide', width: 640, row: 31, bar: 20, labelWidth: 200, valueRoom: 54 },
+  { name: 'narrow', width: 320, row: 42, bar: 13, labelWidth: 0, valueRoom: 50 },
+];
+
+function draw(size: (typeof sizes)[number]) {
+  const { width, row, bar, labelWidth, valueRoom } = size;
+  const stacked = labelWidth === 0;
+  const x = scaleLinear()
+    .domain([0, highest])
+    .range([labelWidth, width - valueRoom]);
+
+  return {
+    ...size,
+    height: sectors.length * row,
+    axisX: labelWidth,
+    rows: sectors.map((sector, index) => {
+      const top = index * row;
+      const barY = stacked ? top + 21 : top + (row - bar) / 2;
+      return {
+        sector: sector.sector,
+        value: share(sector.displacement),
+        emphasised: index === 0,
+        labelX: stacked ? 0 : labelWidth - 12,
+        labelY: stacked ? top + 13 : top + row / 2,
+        labelAnchor: stacked ? 'start' : 'end',
+        labelDy: stacked ? '0' : '0.35em',
+        barY,
+        barWidth: x(sector.displacement) - labelWidth,
+        valueX: x(sector.displacement) + 8,
+        valueY: barY + bar / 2,
+      };
+    }),
+  };
+}
+
+const charts = sizes.map(draw);
+---
+
+<div class="fc">
+  {
+    charts.map((c) => (
+      <svg class={`fc-${c.name}`} viewBox={`0 0 ${c.width} ${c.height}`} aria-hidden="true">
+        {c.rows.map((row) => (
+          <>
+            <text
+              class={row.emphasised ? 'fc-strong' : ''}
+              x={row.labelX}
+              y={row.labelY}
+              dy={row.labelDy}
+              text-anchor={row.labelAnchor}
+            >
+              {row.sector}
+            </text>
+            <rect
+              class={row.emphasised ? 'fc-bar fc-mark-1' : 'fc-bar'}
+              x={c.axisX}
+              y={row.barY}
+              width={row.barWidth}
+              height={c.bar}
+            />
+            <text
+              class={row.emphasised ? 'fc-strong' : ''}
+              x={row.valueX}
+              y={row.valueY}
+              dy="0.35em"
+            >
+              {row.value}
+            </text>
+          </>
+        ))}
+        {c.labelWidth > 0 && (
+          <line class="fc-axis" x1={c.axisX} x2={c.axisX} y1="0" y2={c.height} />
+        )}
+      </svg>
+    ))
+  }
+
+  <table class="visually-hidden">
+    <caption>
+      Displacement by Sector, average of the latest four quarters, highest first.
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Sector</th>
+        <th scope="col">Displacement</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        sectors.map((sector) => (
+          <tr>
+            <th scope="row">{sector.sector}</th>
+            <td>{share(sector.displacement)}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
