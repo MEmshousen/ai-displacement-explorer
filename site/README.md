@@ -109,6 +109,3 @@ sets the serif type for the sentence; the clickable words should use `--color-ac
 
 On a phone the regions stack in the order above. From 640px the two charts sit side by side under the
 map; from 980px the map is on the left and the charts are stacked on the right.
-
-`SelectionDebug.astro` at the bottom of the panel is temporary and goes once a real view consumes the
-Selection.
