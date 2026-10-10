@@ -1,0 +1,202 @@
+---
+// The trend chart: the Selection's metric across every quarter, for the selected country, the
+// pinned countries and the global average. Drawn in the browser by ./chart.ts; this file holds
+// the frame it draws into and the look of every mark.
+//
+// Lines are told apart without relying on colour: each has its name at its end, its own stroke
+// style, and a row in the readout under the chart that repeats the stroke beside the name.
+---
+
+<div class="trend" data-trend-chart>
+  <div class="plot">
+    <svg data-trend-svg viewBox="0 0 400 200" role="img" aria-label="Trend chart, loading."></svg>
+    <input
+      class="visually-hidden"
+      data-trend-scrubber
+      type="range"
+      min="0"
+      max="25"
+      step="1"
+      aria-label="Read the trend chart quarter by quarter"
+    />
+  </div>
+  <div class="readout" data-trend-readout></div>
+  <p class="hint" data-trend-hint hidden>Click a country on the map to add its line here.</p>
+</div>
+
+<script>
+  import { explorerPage } from '../page';
+  import { mountTrendChart } from './chart';
+
+  const root = document.querySelector<HTMLElement>('[data-trend-chart]');
+  if (root) {
+    try {
+      mountTrendChart(root, await explorerPage());
+    } catch (error) {
+      const hint = root.querySelector<HTMLElement>('[data-trend-hint]')!;
+      hint.textContent = 'The trend chart could not load its data.';
+      hint.hidden = false;
+      console.error(error);
+    }
+  }
+</script>
+
+<style>
+  .plot {
+    position: relative;
+  }
+  .plot:has(input:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  .plot svg {
+    overflow: visible;
+    /* A sideways drag reads the chart; an up or down drag still scrolls the page. */
+    touch-action: pan-y;
+  }
+  .hint {
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  /* Everything below is drawn by the script, so it is styled through :global. */
+  .trend :global(text) {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    fill: var(--chart-text-muted);
+  }
+  .trend :global(.trend-grid) {
+    stroke: var(--chart-grid);
+  }
+  .trend :global(.trend-zero) {
+    stroke: var(--chart-axis);
+  }
+
+  /* The lines. Stroke style, not only colour, tells them apart. */
+  .trend :global(.trend-line) {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .trend :global([data-role='global']) {
+    --line: var(--chart-neutral-strong);
+    --label: var(--chart-text-muted);
+  }
+  .trend :global([data-role='selected']) {
+    --line: var(--chart-series-1);
+    --label: var(--chart-series-1-text);
+  }
+  .trend :global([data-role='pinned']) {
+    --line: var(--chart-series-2);
+    --label: var(--chart-series-2-text);
+  }
+  .trend :global(.trend-line) {
+    stroke: var(--line);
+  }
+  .trend :global(.trend-line[data-role='global']) {
+    stroke-width: 1.5;
+    stroke-dasharray: 1.5 4;
+  }
+  .trend :global(.trend-line[data-role='selected']) {
+    stroke-width: 2.75;
+  }
+  .trend :global(.trend-line[data-role='pinned']) {
+    stroke-width: 1.75;
+  }
+  .trend :global(.trend-line[data-role='pinned'][data-slot='1']) {
+    stroke-dasharray: 7 4.5;
+  }
+  .trend :global(.trend-line[data-role='pinned'][data-slot='2']) {
+    stroke-dasharray: 7 4 0.1 4;
+  }
+
+  .trend :global(.trend-end) {
+    fill: var(--line);
+  }
+  .trend :global(.trend-leader) {
+    stroke: var(--line);
+    stroke-width: 0.75;
+  }
+  .trend :global(.trend-label) {
+    font-size: 12px;
+    font-weight: 500;
+    fill: var(--label);
+    /* A halo, so a label stays readable where a line passes behind it. */
+    paint-order: stroke;
+    stroke: var(--chart-bg);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+  }
+  .trend :global(.trend-label[data-role='selected']) {
+    font-weight: 600;
+  }
+  .trend :global(.trend-dot) {
+    fill: var(--chart-bg);
+    stroke: var(--line);
+    stroke-width: 1.75;
+    pointer-events: none;
+  }
+
+  /* The Selection's quarter, and the quarter under the pointer. */
+  .trend :global(.trend-rule) {
+    stroke: var(--chart-axis);
+    stroke-width: 1;
+  }
+  .trend :global(.trend-rule-label) {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    fill: var(--chart-text-strong);
+  }
+  .trend :global(.trend-hover-rule) {
+    stroke: var(--chart-neutral-strong);
+    stroke-width: 1;
+    stroke-dasharray: 2 2;
+  }
+
+  /* The readout under the chart. */
+  .readout {
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+  }
+  .trend :global(.trend-readout-quarter) {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: 0.09em;
+    color: var(--color-faint);
+  }
+  .trend :global(.trend-readout-lines) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .trend :global(.trend-readout-line) {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding-block: 0.15rem;
+    border-top: 1px solid var(--chart-grid);
+    color: var(--chart-text);
+  }
+  .trend :global(svg.trend-swatch) {
+    flex: none;
+    width: 26px;
+    height: 10px;
+  }
+  .trend :global(.trend-readout-name) {
+    flex: 1;
+    min-width: 0;
+  }
+  .trend :global(.trend-readout-tag) {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+  }
+  .trend :global(.trend-readout-value) {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: var(--chart-text-strong);
+  }
+</style>

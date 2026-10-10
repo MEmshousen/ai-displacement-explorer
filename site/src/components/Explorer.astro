@@ -6,6 +6,7 @@ import EmptyFrame from './EmptyFrame.astro';
 import HandoverBand from './HandoverBand.astro';
 import SelectionSentence from '../explorer/sentence/SelectionSentence.astro';
 import ViewPane from './ViewPane.astro';
+import TrendChart from '../explorer/trend/TrendChart.astro';
 ---
 
 <section id="explorer" aria-labelledby="explorer-heading">
@@ -35,10 +36,10 @@ import ViewPane from './ViewPane.astro';
           {/* REGION trend: the selected country against the global average, over time. */}
           <ViewPane
             region="trend"
-            title="Trend chart"
-            subtitle="The chosen metric over time, 2020-Q1 to 2026-Q2."
+            title="The global average over time"
+            subtitle="Displacement, all Sectors, 2020-Q1 to 2026-Q2"
           >
-            <EmptyFrame label="Trend chart" ratio="400 / 180" />
+            <TrendChart />
           </ViewPane>
 
           {/* REGION sectors: the ten Sectors ranked for the chosen quarter. */}
