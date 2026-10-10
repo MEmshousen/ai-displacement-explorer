@@ -88,82 +88,82 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --color-page: #161512; /* near-black, warm like the paper */
-  --color-panel: #201e1a;
-  --color-surface: #292722;
+  --color-page: #0e1213; /* near-black, cool, so the dark theme has its own character */
+  --color-panel: #161b1c;
+  --color-surface: #1d2324;
   --color-ink: #f3f0e8;
   --color-body: #dedad0;
   --color-muted: #b5b1a7;
   --color-faint: #a39f95;
-  --color-rule: #3b3832;
-  --color-accent: #8fa9f7; /* the same blue, lightened to read on dark */
+  --color-rule: #2d3435;
+  --color-accent: #3fe3c5; /* electric mint: the dark theme's own accent */
 
   /* The handover band turns over with the page: a paper band with ink type. */
   --color-inverse: #ebe7dc;
   --color-on-inverse: #141414;
   --color-on-inverse-muted: #45433e;
-  --color-on-inverse-accent: #1a3fa8;
+  --color-on-inverse-accent: #0b6b5c;
 
-  --chart-series-1: #7f9cf5;
-  --chart-series-1-text: #9db4f8;
+  --chart-series-1: #2fd6b8;
+  --chart-series-1-text: #5eead0;
   --chart-series-2: #e58a45;
   --chart-series-2-text: #f0a468;
-  --chart-neutral: #6b675f;
+  --chart-neutral: #5f6768;
   --chart-neutral-strong: #b5b1a7;
   --chart-text: #cfcbc1;
   --chart-text-muted: #a39f95;
   --chart-text-strong: #f3f0e8;
-  --chart-grid: #302e29;
+  --chart-grid: #242a2b;
   --chart-axis: #f3f0e8;
-  --chart-band: #24221e;
-  --chart-bg: #161512;
+  --chart-band: #1a1f20;
+  --chart-bg: #0e1213;
   --chart-selected: #fff;
-  --chart-no-data: #33312c;
-  --chart-ramp-1: #26335f;
-  --chart-ramp-2: #344a91;
-  --chart-ramp-3: #4a66c2;
-  --chart-ramp-4: #7590ec;
-  --chart-ramp-5: #c3d0fc;
+  --chart-no-data: #2b3031;
+  --chart-ramp-1: #123a36;
+  --chart-ramp-2: #1a5a52;
+  --chart-ramp-3: #1f8576;
+  --chart-ramp-4: #2fc2a6;
+  --chart-ramp-5: #b6f7e6;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     color-scheme: dark;
 
-    --color-page: #161512; /* near-black, warm like the paper */
-    --color-panel: #201e1a;
-    --color-surface: #292722;
+    --color-page: #0e1213; /* near-black, cool, so the dark theme has its own character */
+    --color-panel: #161b1c;
+    --color-surface: #1d2324;
     --color-ink: #f3f0e8;
     --color-body: #dedad0;
     --color-muted: #b5b1a7;
     --color-faint: #a39f95;
-    --color-rule: #3b3832;
-    --color-accent: #8fa9f7; /* the same blue, lightened to read on dark */
+    --color-rule: #2d3435;
+    --color-accent: #3fe3c5; /* electric mint: the dark theme's own accent */
 
     /* The handover band turns over with the page: a paper band with ink type. */
     --color-inverse: #ebe7dc;
     --color-on-inverse: #141414;
     --color-on-inverse-muted: #45433e;
-    --color-on-inverse-accent: #1a3fa8;
+    --color-on-inverse-accent: #0b6b5c;
 
-    --chart-series-1: #7f9cf5;
-    --chart-series-1-text: #9db4f8;
+    --chart-series-1: #2fd6b8;
+    --chart-series-1-text: #5eead0;
     --chart-series-2: #e58a45;
     --chart-series-2-text: #f0a468;
-    --chart-neutral: #6b675f;
+    --chart-neutral: #5f6768;
     --chart-neutral-strong: #b5b1a7;
     --chart-text: #cfcbc1;
     --chart-text-muted: #a39f95;
     --chart-text-strong: #f3f0e8;
-    --chart-grid: #302e29;
+    --chart-grid: #242a2b;
     --chart-axis: #f3f0e8;
-    --chart-band: #24221e;
-    --chart-bg: #161512;
+    --chart-band: #1a1f20;
+    --chart-bg: #0e1213;
     --chart-selected: #fff;
-    --chart-no-data: #33312c;
-    --chart-ramp-1: #26335f;
-    --chart-ramp-2: #344a91;
-    --chart-ramp-3: #4a66c2;
-    --chart-ramp-4: #7590ec;
-    --chart-ramp-5: #c3d0fc;
+    --chart-no-data: #2b3031;
+    --chart-ramp-1: #123a36;
+    --chart-ramp-2: #1a5a52;
+    --chart-ramp-3: #1f8576;
+    --chart-ramp-4: #2fc2a6;
+    --chart-ramp-5: #b6f7e6;
   }
 }
