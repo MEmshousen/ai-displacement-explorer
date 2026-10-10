@@ -1,8 +1,9 @@
 # AI Displacement Explorer: site
 
-The static [Astro](https://astro.build) site for the AI Displacement Explorer. It currently holds
-the editorial page design, the shared Selection and the data step that feeds both. Every chart and
-view is still an empty, labelled frame.
+The static [Astro](https://astro.build) site for the AI Displacement Explorer: one page with the
+four Headline findings and their charts, then the Explorer (the Selection sentence, the world map
+with its quarter slider, the trend chart and the Sector bars). The data step feeds both from the
+CSV. The repo's root `README.md` describes the project as a whole.
 
 Requires Node 22.12 or newer. Run every command from this `site/` folder.
 
@@ -68,13 +69,13 @@ Sans weights are 400, 500 and 600; mono 400 and 500. Another weight needs anothe
 ### Plugging a chart into a chapter
 
 Each Headline finding is a `<Chapter>` in `src/components/HeadlineFindings.astro`. The chapter already
-has the chart's title, subtitle and source line; the chart goes in the `chart` slot and replaces the
-empty frame:
+has the chart's title, subtitle and source line; the chart goes in the `chart` slot. The four charts
+are in `src/findings/`. A chapter with nothing in that slot shows an empty, labelled frame:
 
 ```astro
 <Chapter number={2} title="The Sector gap" chartTitle="..." chartSubtitle="...">
   <p>The finding's text.</p>
-  <SectorGapChart slot="chart" />
+  <SectorGapBars slot="chart" />
 </Chapter>
 ```
 
@@ -85,14 +86,18 @@ empty frame:
   standard source line).
 - `explorerQuery` sets the Selection the "See this in the Explorer" link opens, as a query string such
   as `"?sector=administrative-clerical"`.
-- Once the chart is in, `chartRatio` and `chartPlaceholder` only describe the empty frame and can go.
+- `chartRatio` and `chartPlaceholder` only describe the empty frame, so a chapter with a chart does
+  not need them.
 
-The four numbers in the summary strip are in `src/components/SummaryStrip.astro`.
+The four numbers in the summary strip are in `src/components/SummaryStrip.astro`. They and the
+numbers in the chapters' text are read from the findings data, never typed in; the build stops if
+the fixed wording around them no longer matches the data (`wordingProblems` in
+`src/findings/facts.ts`).
 
 ### Where the views go in the Explorer panel
 
-`src/components/Explorer.astro` lays out the tinted panel. Each region holds an `<EmptyFrame>`;
-replace that with the real component and leave the wrapper in place.
+`src/components/Explorer.astro` lays out the tinted panel. Each region holds its view's component,
+from the matching folder under `src/explorer/` (`sentence/`, `map/`, `trend/`, `sectors/`).
 
 | Region            | Element id           | What goes there                                              |
 | :---------------- | :------------------- | :----------------------------------------------------------- |
