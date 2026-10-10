@@ -4,7 +4,7 @@
 // with the real component; see site/README.md.
 import EmptyFrame from './EmptyFrame.astro';
 import HandoverBand from './HandoverBand.astro';
-import SelectionDebug from './SelectionDebug.astro';
+import SelectionSentence from '../explorer/sentence/SelectionSentence.astro';
 import ViewPane from './ViewPane.astro';
 ---
 
@@ -15,7 +15,7 @@ import ViewPane from './ViewPane.astro';
     <div class="wrap">
       {/* REGION sentence: the Selection as a sentence with clickable words. The only control. */}
       <div class="sentence" id="explorer-sentence" data-region="sentence">
-        <EmptyFrame label="Selection sentence" height="4.5rem" />
+        <SelectionSentence />
       </div>
 
       <div class="views">
@@ -51,9 +51,6 @@ import ViewPane from './ViewPane.astro';
           </ViewPane>
         </div>
       </div>
-
-      {/* TEMPORARY: remove once a real view consumes the Selection. */}
-      <div class="debug"><SelectionDebug /></div>
     </div>
   </div>
 </section>
@@ -96,9 +93,5 @@ import ViewPane from './ViewPane.astro';
       grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
       align-items: start;
     }
-  }
-
-  .debug {
-    margin-top: var(--space-6);
   }
 </style>
