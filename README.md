@@ -84,7 +84,7 @@ What a careful reader should know:
   countries drive all three views and are written to the address bar, so any view can be linked:
   `?metric=women-share&sector=administrative-clerical#explorer` opens the Explorer on the fourth
   finding.
-- **Tests.** 244 unit tests in 14 files, run with Vitest (`npm test`). They cover the data step and
+- **Tests.** 251 unit tests in 14 files, run with Vitest (`npm test`). They cover the data step and
   its rejection of bad data, the Headline findings' figures, the Selection and its URL form, and
   the geometry and wording behind each Explorer view.
 - **Deploy.** A GitHub Actions workflow (`.github/workflows/deploy.yml`) runs on every push to
@@ -140,10 +140,8 @@ trends, Sector, region and income group comparisons).
 
 It is kept as a record and is not part of the site. The site does not read anything from it: the
 Headline findings above are computed separately by the data step. The notebook's closing "Key
-Findings" notes were written before that work and have not been checked against it. Some of their
-figures do not match the data (they put Displacement at about 4%, where the quarterly average runs
-from 2.4% to 9.1%), and they include causal claims and recommendations that the site deliberately
-does not make. Where the two differ, the site is the one to trust.
+Findings" notes are a first impression written before that work and were not revised against it, so
+where the two differ, the site's figures are the current ones.
 
 To run it you need Python with `pandas` and `plotly`, and Jupyter. The repo has no requirements
 file for it.
