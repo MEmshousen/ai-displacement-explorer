@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeadlineFindings from '../components/HeadlineFindings.astro';
+import Explorer from '../components/Explorer.astro';
+
+const title = 'AI Displacement Explorer';
+const description =
+  'How AI adoption is reshaping workforces across 80 countries and ten Sectors from 2020 to 2026: Displacement, Net change and Replacement rate, shown with Synthetic data calibrated to published research.';
+---
+
+<BaseLayout title={title} description={description}>
+  <header>
+    <h1>{title}</h1>
+    <p>
+      How AI adoption is reshaping workforces across 80 countries and ten Sectors, quarter by
+      quarter from 2020 to 2026.
+    </p>
+    <p class="synthetic-note" role="note">
+      <strong>Synthetic data.</strong> Every figure on this site is simulated and calibrated to published
+      research. None of the numbers are measured observations.
+    </p>
+  </header>
+
+  <main>
+    <HeadlineFindings />
+    <Explorer />
+  </main>
+</BaseLayout>
