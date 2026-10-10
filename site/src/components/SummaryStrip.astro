@@ -1,0 +1,142 @@
+---
+// The four-number summary strip. Each item links to its chapter.
+// A figure is a list of parts; the part marked `accent` is the number the finding turns on.
+interface Part {
+  text: string;
+  accent?: boolean;
+}
+interface Item {
+  href: string;
+  label: string;
+  figure: Part[];
+  text: string;
+}
+
+const items: Item[] = [
+  {
+    href: '#finding-1',
+    label: 'Over time',
+    figure: [{ text: '2.7% → ' }, { text: '8.7%', accent: true }],
+    text: 'Displacement tripled; Net change fell from −0.9% to −3.3%.',
+  },
+  {
+    href: '#finding-2',
+    label: 'By Sector',
+    figure: [{ text: '14.2%', accent: true }, { text: ' vs 3.3%' }],
+    text: 'Administrative & Clerical at the top, Healthcare & Life Sciences at the bottom.',
+  },
+  {
+    href: '#finding-3',
+    label: 'By income group',
+    figure: [{ text: '13.1%', accent: true }, { text: ', 75 per 100' }],
+    text: 'Rich countries lose more but recover more.',
+  },
+  {
+    href: '#finding-4',
+    label: 'By gender',
+    figure: [{ text: '79% → ' }, { text: '95%', accent: true }],
+    text: "Women's share of clerical workforce against their share of its displaced roles.",
+  },
+];
+---
+
+<nav class="strip" aria-label="Headline findings">
+  <ol>
+    {
+      items.map((item, index) => (
+        <li>
+          <a href={item.href}>
+            <span class="label">
+              {index + 1} · {item.label}
+            </span>
+            <span class="figure">
+              {item.figure.map((part) => (part.accent ? <b>{part.text}</b> : part.text))}
+            </span>
+            <span class="text">{item.text}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .strip {
+    margin-top: var(--space-7);
+    border-top: 1px solid var(--color-ink);
+  }
+  ol {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li {
+    border-bottom: 1px solid var(--color-rule);
+  }
+  a {
+    display: block;
+    height: 100%;
+    padding: var(--space-4) var(--space-4) 1.1rem 0;
+    text-decoration: none;
+  }
+  a:hover .figure {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 5px;
+  }
+  a:focus-visible {
+    outline-offset: -2px;
+  }
+  span {
+    display: block;
+  }
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-faint);
+  }
+  .figure {
+    margin: 0.3rem 0 var(--space-1);
+    font-family: var(--font-serif);
+    font-size: var(--text-figure);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .figure b {
+    font-weight: inherit;
+    color: var(--color-accent);
+  }
+  .text {
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: var(--color-muted);
+  }
+
+  @media (min-width: 560px) and (max-width: 899px) {
+    ol {
+      grid-template-columns: 1fr 1fr;
+    }
+    li:nth-child(odd) a {
+      padding-right: var(--space-5);
+    }
+  }
+  @media (min-width: 900px) {
+    ol {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    li {
+      border-bottom: 0;
+      border-right: 1px solid var(--color-rule);
+    }
+    li:last-child {
+      border-right: 0;
+    }
+    a {
+      padding-left: var(--space-4);
+    }
+    li:first-child a {
+      padding-left: 0;
+    }
+  }
+</style>

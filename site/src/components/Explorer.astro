@@ -1,13 +1,104 @@
 ---
+// The Explorer: the black handover band, then the tinted panel holding the Selection sentence and
+// the three views. Each region below is an empty frame until its ticket replaces the <EmptyFrame>
+// with the real component; see site/README.md.
+import EmptyFrame from './EmptyFrame.astro';
+import HandoverBand from './HandoverBand.astro';
 import SelectionDebug from './SelectionDebug.astro';
+import ViewPane from './ViewPane.astro';
 ---
 
 <section id="explorer" aria-labelledby="explorer-heading">
-  <h2 id="explorer-heading">Explorer</h2>
-  <p class="placeholder">
-    Placeholder: a world map, a trend chart and Sector bars will go here, all driven by one shared
-    Selection.
-  </p>
-  {/* TEMPORARY: remove once a real view consumes the Selection. */}
-  <SelectionDebug />
+  <HandoverBand headingId="explorer-heading" />
+
+  <div class="panel">
+    <div class="wrap">
+      {/* REGION sentence: the Selection as a sentence with clickable words. The only control. */}
+      <div class="sentence" id="explorer-sentence" data-region="sentence">
+        <EmptyFrame label="Selection sentence" height="4.5rem" />
+      </div>
+
+      <div class="views">
+        {/* REGION map: the world map, with the quarter slider in its controls slot. */}
+        <ViewPane
+          region="map"
+          title="World map"
+          subtitle="The chosen metric by country, for the chosen quarter."
+        >
+          <EmptyFrame label="World map" ratio="580 / 300" />
+          <div slot="controls" id="explorer-slider" data-region="slider">
+            <EmptyFrame label="Quarter slider, 2020-Q1 to 2026-Q2" height="3rem" />
+          </div>
+        </ViewPane>
+
+        <div class="side">
+          {/* REGION trend: the selected country against the global average, over time. */}
+          <ViewPane
+            region="trend"
+            title="Trend chart"
+            subtitle="The chosen metric over time, 2020-Q1 to 2026-Q2."
+          >
+            <EmptyFrame label="Trend chart" ratio="400 / 180" />
+          </ViewPane>
+
+          {/* REGION sectors: the ten Sectors ranked for the chosen quarter. */}
+          <ViewPane
+            region="sectors"
+            title="Sector bars"
+            subtitle="The chosen metric for the ten Sectors, ranked."
+          >
+            <EmptyFrame label="Sector bars" ratio="400 / 214" />
+          </ViewPane>
+        </div>
+      </div>
+
+      {/* TEMPORARY: remove once a real view consumes the Selection. */}
+      <div class="debug"><SelectionDebug /></div>
+    </div>
+  </div>
 </section>
+
+<style>
+  .panel {
+    padding-block: 1.6rem var(--space-7);
+    border-bottom: 1px solid var(--color-ink);
+    background: var(--color-panel);
+  }
+
+  /* Type for the Selection sentence, inherited by whatever fills the region. */
+  .sentence {
+    margin-bottom: 1.3rem;
+    font-family: var(--font-serif);
+    font-size: var(--text-sentence);
+    line-height: 1.5;
+  }
+
+  /* Phone: the map, then the trend chart, then the Sector bars, in one column. */
+  .views,
+  .side {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+  }
+  .side {
+    min-width: 0;
+  }
+
+  /* Tablet: the map full width, the two charts side by side under it. */
+  @media (min-width: 640px) and (max-width: 979px) {
+    .side {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  /* Desktop: the map on the left, the two charts stacked on the right. */
+  @media (min-width: 980px) {
+    .views {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  .debug {
+    margin-top: var(--space-6);
+  }
+</style>

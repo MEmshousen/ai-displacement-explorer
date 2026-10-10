@@ -1,0 +1,80 @@
+/* Design tokens for the editorial look. Every colour, font and size on the site comes from here. */
+:root {
+  color-scheme: light;
+
+  /* Page colours */
+  --color-page: #fbfaf6; /* off-white paper */
+  --color-panel: #f1efe8; /* the Explorer's tinted panel */
+  --color-surface: #fff; /* the Synthetic data note */
+  --color-ink: #141414;
+  --color-body: #2a2925; /* long serif text */
+  --color-muted: #55534e;
+  --color-faint: #66635d; /* small labels; 4.5:1 or better on page and panel */
+  --color-rule: #d9d6cd;
+  --color-accent: #1a3fa8; /* the one blue */
+
+  /* On the black handover band */
+  --color-inverse: #141414;
+  --color-on-inverse: #fbfaf6;
+  --color-on-inverse-muted: #cfccc4;
+  --color-on-inverse-accent: #9fb4f0;
+
+  /* Chart colours. Charts read these and never hard-code a colour. */
+  --chart-series-1: #1a3fa8; /* first series, and the highlighted mark */
+  --chart-series-1-text: #1a3fa8;
+  --chart-series-2: #d9772f; /* orange: only ever a second data series */
+  --chart-series-2-text: #b4541a; /* darker orange for labels, readable on the page */
+  --chart-neutral: #b9b6ad; /* bars that are not highlighted */
+  --chart-neutral-strong: #55534e; /* dots and lines that are not highlighted */
+  --chart-text: #3b3a36;
+  --chart-text-muted: #66635d;
+  --chart-text-strong: #141414;
+  --chart-grid: #e3e0d7;
+  --chart-axis: #141414;
+  --chart-band: #efede5; /* shaded period bands */
+  --chart-bg: #fbfaf6; /* halo behind marks and labels */
+  --chart-selected: #141414; /* outline of the selected country */
+  --chart-no-data: #e2dfd6;
+  /* Five-step ramp for the map, low to high */
+  --chart-ramp-1: #dbe3f6;
+  --chart-ramp-2: #a9bbea;
+  --chart-ramp-3: #6f8bd9;
+  --chart-ramp-4: #3d5fc2;
+  --chart-ramp-5: #142f80;
+
+  /* Fonts */
+  --font-serif: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+
+  /* Type scale */
+  --text-label: 0.74rem; /* mono caps labels */
+  --text-xs: 0.8rem; /* source lines */
+  --text-sm: 0.9rem;
+  --text-base: 1rem;
+  --text-chart-title: 1.05rem;
+  --text-prose: 1.2rem; /* serif chapter text */
+  --text-standfirst: clamp(1.15rem, 2.4vw, 1.5rem);
+  --text-sentence: clamp(1.25rem, 2.6vw, 1.75rem);
+  --text-figure: 2.1rem; /* summary strip numbers */
+  --text-chapter: clamp(1.9rem, 4.2vw, 2.9rem);
+  --text-chapter-number: clamp(3.2rem, 8vw, 4.5rem);
+  --text-band: clamp(2.2rem, 6vw, 4.2rem);
+  --text-headline: clamp(2.5rem, 7.6vw, 5.6rem);
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
+  --space-8: 3.5rem;
+  --space-section: clamp(2.5rem, 6vw, 4.5rem);
+
+  /* Layout */
+  --gutter: clamp(1.1rem, 5vw, 3rem);
+  --page-width: 1160px;
+  --rule-heavy: 5px;
+}
