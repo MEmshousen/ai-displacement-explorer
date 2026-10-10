@@ -1,4 +1,5 @@
 ---
+import SelectionDebug from './SelectionDebug.astro';
 ---
 
 <section id="explorer" aria-labelledby="explorer-heading">
@@ -7,4 +8,6 @@
     Placeholder: a world map, a trend chart and Sector bars will go here, all driven by one shared
     Selection.
   </p>
+  {/* TEMPORARY: remove once a real view consumes the Selection. */}
+  <SelectionDebug />
 </section>

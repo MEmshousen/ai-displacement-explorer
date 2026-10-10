@@ -1,0 +1,131 @@
+---
+// TEMPORARY: a debug readout that proves the shared Selection and the URL stay in step.
+// Delete this file, and its use in Explorer.astro, once a real view consumes the Selection.
+import { METRICS, type ValidChoices } from '../selection';
+
+// TEMPORARY stand-in for the data step, which will supply the real valid choices
+// (all ten Sectors, 26 quarters and 80 countries) from the dataset.
+const choices: ValidChoices = {
+  sectors: [
+    'Administrative & Clerical',
+    'Education & Research',
+    'Energy & Utilities',
+    'Finance & Banking',
+    'Healthcare & Life Sciences',
+    'Manufacturing & Industry',
+    'Media & Communications',
+    'Retail & E-Commerce',
+    'Technology & Software',
+    'Transportation & Logistics',
+  ],
+  quarters: [2020, 2021, 2022, 2023, 2024, 2025, 2026]
+    .flatMap((year) => [1, 2, 3, 4].map((quarter) => `${year}-Q${quarter}`))
+    .filter((label) => label <= '2026-Q2'),
+  countries: ['USA', 'DEU', 'JPN', 'IND', 'BRA', 'NGA'],
+};
+
+// BASE_URL may or may not end in a slash depending on the configured base.
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+
+<aside class="selection-debug" data-selection-debug data-choices={JSON.stringify(choices)}>
+  <p><strong>Temporary debug readout.</strong> Not part of the design; to be removed.</p>
+
+  <label>
+    Metric
+    <select data-field="metric">
+      {METRICS.map((metric) => <option value={metric.id}>{metric.label}</option>)}
+    </select>
+  </label>
+  <label>
+    Sector
+    <select data-field="sector">
+      <option value="">All Sectors</option>
+      {choices.sectors.map((sector) => <option value={sector}>{sector}</option>)}
+    </select>
+  </label>
+  <label>
+    Quarter
+    <select data-field="quarter">
+      {choices.quarters.map((quarter) => <option value={quarter}>{quarter}</option>)}
+    </select>
+  </label>
+  <label>
+    Country
+    <select data-field="country">
+      <option value="">None</option>
+      {choices.countries.map((country) => <option value={country}>{country}</option>)}
+    </select>
+  </label>
+  <fieldset>
+    <legend>Pinned countries (up to three)</legend>
+    {
+      choices.countries.map((country) => (
+        <label>
+          <input type="checkbox" data-pin={country} /> {country}
+        </label>
+      ))
+    }
+  </fieldset>
+
+  <pre data-readout></pre>
+  <p><a href={`${base}#explorer`}>Reset to the default Selection</a></p>
+</aside>
+
+<style>
+  .selection-debug {
+    padding: 0.75rem 1rem;
+    border: 2px dashed var(--rule);
+    font-size: 0.9rem;
+  }
+  .selection-debug > label {
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+  .selection-debug fieldset label {
+    margin-right: 0.75rem;
+  }
+  .selection-debug pre {
+    overflow-x: auto;
+  }
+</style>
+
+<script>
+  import { browserUrl, createSelectionStore, type Selection, type ValidChoices } from '../selection';
+
+  const root = document.querySelector<HTMLElement>('[data-selection-debug]');
+  if (root) {
+    const choices: ValidChoices = JSON.parse(root.dataset.choices ?? '');
+    const store = createSelectionStore(choices, { url: browserUrl() });
+
+    const fields = [...root.querySelectorAll<HTMLSelectElement>('select[data-field]')];
+    const pins = [...root.querySelectorAll<HTMLInputElement>('input[data-pin]')];
+    const readout = root.querySelector<HTMLElement>('[data-readout]')!;
+
+    const render = (selection: Selection) => {
+      for (const field of fields) {
+        field.value = selection[field.dataset.field as 'metric' | 'sector' | 'quarter' | 'country'] ?? '';
+      }
+      for (const pin of pins) pin.checked = selection.pinned.includes(pin.dataset.pin!);
+      readout.textContent = `${JSON.stringify(selection, null, 2)}\n\nURL query: ${location.search || '(none)'}`;
+    };
+
+    for (const field of fields) {
+      field.addEventListener('change', () => {
+        store.update({ [field.dataset.field!]: field.value === '' ? null : field.value });
+      });
+    }
+    for (const pin of pins) {
+      pin.addEventListener('change', () => {
+        const code = pin.dataset.pin!;
+        const pinned = store.get().pinned.filter((other) => other !== code);
+        store.update({ pinned: pin.checked ? [...pinned, code] : pinned });
+        // A fourth pin is refused, so put the checkbox back to match the Selection.
+        render(store.get());
+      });
+    }
+
+    store.subscribe(render);
+    render(store.get());
+  }
+</script>
