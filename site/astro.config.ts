@@ -1,9 +1,8 @@
 import { defineConfig } from 'astro/config';
 import { dataStep } from './src/data/step/integration';
 
-// The hosting URL is not decided yet. Set SITE_BASE to serve from a subpath
-// (for example SITE_BASE=/AI_Displacement_Project on GitHub Pages) and
-// SITE_URL to the full origin once it is known. Both are optional.
+// Served from / by default. The GitHub Pages deploy sets SITE_BASE=/ai-displacement-explorer
+// and SITE_URL=https://memshousen.github.io. Both are optional.
 const base = process.env.SITE_BASE || '/';
 const site = process.env.SITE_URL || undefined;
 

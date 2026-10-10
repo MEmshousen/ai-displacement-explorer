@@ -92,12 +92,13 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 </style>
 
 <script>
-  import { browserUrl, createSelectionStore, type Selection, type ValidChoices } from '../selection';
+  import { explorerPage } from '../explorer/page';
+  import type { Selection } from '../selection';
 
   const root = document.querySelector<HTMLElement>('[data-selection-debug]');
   if (root) {
-    const choices: ValidChoices = JSON.parse(root.dataset.choices ?? '');
-    const store = createSelectionStore(choices, { url: browserUrl() });
+    // The page's shared Selection, so this readout and the real views stay in step.
+    const { store } = await explorerPage();
 
     const fields = [...root.querySelectorAll<HTMLSelectElement>('select[data-field]')];
     const pins = [...root.querySelectorAll<HTMLInputElement>('input[data-pin]')];
