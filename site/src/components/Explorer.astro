@@ -2,6 +2,8 @@
 // The Explorer: the black handover band, then the tinted panel holding the Selection sentence and
 // the three views. Each region below is an empty frame until its ticket replaces the <EmptyFrame>
 // with the real component; see site/README.md.
+import QuarterSlider from '../explorer/map/QuarterSlider.astro';
+import WorldMap from '../explorer/map/WorldMap.astro';
 import EmptyFrame from './EmptyFrame.astro';
 import HandoverBand from './HandoverBand.astro';
 import SelectionSentence from '../explorer/sentence/SelectionSentence.astro';
@@ -27,9 +29,9 @@ import SectorBars from '../explorer/sectors/SectorBars.astro';
           title="World map"
           subtitle="The chosen metric by country, for the chosen quarter."
         >
-          <EmptyFrame label="World map" ratio="580 / 300" />
+          <WorldMap />
           <div slot="controls" id="explorer-slider" data-region="slider">
-            <EmptyFrame label="Quarter slider, 2020-Q1 to 2026-Q2" height="3rem" />
+            <QuarterSlider />
           </div>
         </ViewPane>
 
