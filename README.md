@@ -84,7 +84,7 @@ What a careful reader should know:
   countries drive all three views and are written to the address bar, so any view can be linked:
   `?metric=women-share&sector=administrative-clerical#explorer` opens the Explorer on the fourth
   finding.
-- **Tests.** 251 unit tests in 14 files, run with Vitest (`npm test`). They cover the data step and
+- **Tests.** 261 unit tests in 14 files, run with Vitest (`npm test`). They cover the data step and
   its rejection of bad data, the Headline findings' figures, the Selection and its URL form, and
   the geometry and wording behind each Explorer view.
 - **Deploy.** A GitHub Actions workflow (`.github/workflows/deploy.yml`) runs on every push to
