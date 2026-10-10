@@ -79,8 +79,9 @@ scale, spacing, and the chart colours. Use the tokens; do not hard-code a colour
 ### Themes
 
 There are two themes, light and dark, and they are one design: the same type, layout and rules, with
-only the colour tokens changed. The dark theme is a near-black warm page with light ink, the accent
-blue lightened to read on dark, and orange still kept for a second data series.
+only the colour tokens changed. The dark theme is a cool near-black page with light ink and its own
+accent, an electric mint in place of the light theme's blue; orange is still kept for a second data
+series.
 
 - The page follows the visitor's system setting (`prefers-color-scheme`) until they use the toggle in
   the masthead. The choice is kept in `localStorage` under `theme` and put on the root element as
