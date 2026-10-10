@@ -184,6 +184,23 @@
     }
   }
 
+  /* Touch widths, and any touch screen: each row is a 44px target, in either layout. */
+  @media (max-width: 979px), (pointer: coarse) {
+    .sector-bars {
+      --pitch: 2.75rem;
+    }
+    .list :global(button) {
+      height: 100%;
+      margin: 0;
+    }
+    @container (min-width: 350px) {
+      .list {
+        --pitch: 2.75rem;
+        --bar-height: 1rem;
+      }
+    }
+  }
+
   .sector-bars.is-drawn :global(li) {
     transition: transform 320ms ease;
   }

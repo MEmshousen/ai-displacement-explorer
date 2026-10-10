@@ -4,12 +4,13 @@
 // countries from the Selection and handles hovering, focusing and clicking.
 import { buildMapGeometry } from './geometry';
 
-const { width, height, shapes, markers } = buildMapGeometry();
+const { width, height, shapes, markers, markerRadius, phoneMarkerRadius } = buildMapGeometry();
 const covered = shapes.filter((shape) => shape.iso3 !== null);
 const uncovered = shapes.filter((shape) => shape.iso3 === null);
 
-/** The radius of a small country's marker, in the map's units. */
-const markerRadius = width / 160;
+/** Where a marker goes on a phone, for the stylesheet to read. */
+const onPhone = (marker: { phoneX: number; phoneY: number }) =>
+  `--phone-cx:${marker.phoneX}px;--phone-cy:${marker.phoneY}px`;
 ---
 
 <div class="map" data-map>
@@ -19,6 +20,7 @@ const markerRadius = width / 160;
       role="group"
       aria-label="World map. Each country with data is a button that selects it."
       aria-describedby="explorer-map-summary explorer-map-classes"
+      style={`--phone-r:${phoneMarkerRadius}px`}
       data-map-svg
     >
       <rect class="sea" width={width} height={height}></rect>
@@ -31,19 +33,27 @@ const markerRadius = width / 160;
       <path class="outline hovered" data-outline="hovered"></path>
       <path class="outline selected" data-outline="selected"></path>
       <g class="halos">
-        {markers.map((marker) => <circle cx={marker.x} cy={marker.y} r={markerRadius} />)}
+        {markers.map((marker) => <circle cx={marker.x} cy={marker.y} r={markerRadius} style={onPhone(marker)} />)}
       </g>
       <g class="markers">
         {
           markers.map((marker) =>
             marker.hasShape ? (
               // The country's shape is its button; the marker is a bigger target for a pointer.
-              <circle cx={marker.x} cy={marker.y} r={markerRadius} data-country={marker.iso3} aria-hidden="true" />
+              <circle
+                cx={marker.x}
+                cy={marker.y}
+                r={markerRadius}
+                style={onPhone(marker)}
+                data-country={marker.iso3}
+                aria-hidden="true"
+              />
             ) : (
               <circle
                 cx={marker.x}
                 cy={marker.y}
                 r={markerRadius}
+                style={onPhone(marker)}
                 data-country={marker.iso3}
                 role="button"
                 tabindex="-1"
@@ -60,6 +70,7 @@ const markerRadius = width / 160;
 
   <p class="visually-hidden" id="explorer-map-summary" data-map-summary></p>
   <p class="status" role="status" data-map-status></p>
+  <p class="hint" data-map-hint>&nbsp;</p>
 
   <div class="legend">
     <p class="legend-title" data-legend-title>&nbsp;</p>
@@ -174,12 +185,23 @@ const markerRadius = width / 160;
     stroke-width: 2px;
   }
 
-  /* On a phone the map is half the size, so the markers are drawn larger to stay visible. */
+  /* On a phone the map is half the size or less, so the markers are drawn larger, to be seen and
+     tapped, and moved off each other (see `phoneX` in geometry.ts). The script copies a marker's
+     phone position to the ring that outlines it. */
   @media (max-width: 639px) {
     .markers circle,
     .halos circle,
     circle.outline {
-      r: 68px;
+      cx: var(--phone-cx);
+      cy: var(--phone-cy);
+      r: calc(var(--phone-r) * 0.72);
+    }
+  }
+  @media (max-width: 479px) {
+    .markers circle,
+    .halos circle,
+    circle.outline {
+      r: var(--phone-r);
     }
   }
 
@@ -211,6 +233,13 @@ const markerRadius = width / 160;
     margin-top: var(--space-2);
     font-size: var(--text-sm);
     color: var(--chart-text-strong);
+  }
+
+  .hint {
+    margin-top: var(--space-2);
+    font-size: var(--text-xs);
+    line-height: 1.25;
+    color: var(--chart-text-muted);
   }
 
   .legend {

@@ -68,6 +68,23 @@ export function trendLines(
   return lines;
 }
 
+/**
+ * A Selection as the trend chart draws it on a phone, where there is no pinning: the pinned
+ * countries are left out, so the chart, its title and its text alternative match the controls on
+ * screen. The Selection itself, and so the address, keeps them for a wider screen.
+ */
+export function withoutPinned<S extends Pick<Selection, 'pinned'>>(selection: S): S {
+  return selection.pinned.length === 0 ? selection : { ...selection, pinned: [] };
+}
+
+/**
+ * The name written at the end of a line. On a narrow chart the global average is just "Global":
+ * the pane's title and the readout under the chart give it in full.
+ */
+export function endLabel(line: Pick<TrendLine, 'role' | 'name'>, narrow: boolean): string {
+  return narrow && line.role === 'global' ? 'Global' : line.name;
+}
+
 /** Whether the chart shows only the global average, so the hint about the map is wanted. */
 export function onlyGlobalAverage(lines: readonly TrendLine[]): boolean {
   return lines.every((line) => line.role === 'global');

@@ -87,9 +87,12 @@ export function viewTitle(countryName: string | null, quarter: string): string {
     : `Sectors in ${countryName}, ${quarter}`;
 }
 
-/** The pane's subtitle: the metric, what its values count, and which way the ranking runs. */
+/**
+ * The pane's subtitle: the metric, what its values count, and which way the ranking runs. A phrase
+ * with no full stop, like the other panes' subtitles.
+ */
 export function viewSubtitle(metric: Pick<Metric, 'label' | 'unit'>): string {
-  return `${metric.label} (${metric.unit}), highest first.`;
+  return `${metric.label} (${metric.unit}), highest first`;
 }
 
 /** The line under the bars saying what choosing a bar does. */

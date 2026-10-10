@@ -7,16 +7,18 @@
 //                  in place. Nothing is added or removed, so nothing flickers.
 
 import { scaleLinear } from 'd3-scale';
-import type { ExplorerPage } from '../page';
+import { PHONE_QUERY, type ExplorerPage } from '../page';
 import { formatMetric, getMetric, type Selection } from '../../selection';
-import { formatTick, linePath, spreadLabels, yAxis, yearTicks } from './layout';
+import { endLabelRoom, formatTick, linePath, NARROW_CHART, spreadLabels, yAxis, yearTicks } from './layout';
 import {
+  endLabel,
   onlyGlobalAverage,
   readoutText,
   trendLines,
   trendSubtitle,
   trendSummary,
   trendTitle,
+  withoutPinned,
   type TrendLine,
 } from './lines';
 
@@ -62,6 +64,10 @@ export function mountTrendChart(root: HTMLElement, { explorer, store }: Explorer
   const { quarters } = explorer.choices;
   const lastIndex = quarters.length - 1;
   scrubber.max = String(lastIndex);
+
+  // A phone has no pinning, so pinned countries that arrive in a link are not drawn there.
+  const phone = window.matchMedia(PHONE_QUERY);
+  const shown = (selection: Selection) => (phone.matches ? withoutPinned(selection) : selection);
 
   /** What draw() leaves behind for showQuarter() to move. */
   interface Drawn {
@@ -117,8 +123,8 @@ export function mountTrendChart(root: HTMLElement, { explorer, store }: Explorer
     const tickLabels = axis.ticks.map((tick) => formatTick(selection.metric, tick, axis.ticks));
     const left = Math.ceil(Math.max(...tickLabels.map((label) => measure(label, 'trend-tick')))) + 8;
 
-    const labelRoom = Math.max(70, width * 0.34);
-    const endLabels = lines.map((line) => fit(line.name, 'trend-label', labelRoom));
+    const labelRoom = endLabelRoom(width);
+    const endLabels = lines.map((line) => fit(endLabel(line, width < NARROW_CHART), 'trend-label', labelRoom));
     const labelWidth = Math.max(...endLabels.map((label) => measure(label, 'trend-label')));
     const right = Math.ceil(labelWidth) + 14;
 
@@ -305,7 +311,8 @@ export function mountTrendChart(root: HTMLElement, { explorer, store }: Explorer
   scrubber.addEventListener('focus', () => read(Number(scrubber.value)));
   scrubber.addEventListener('blur', () => read(null));
 
-  store.subscribe((selection) => {
+  store.subscribe((latest) => {
+    const selection = shown(latest);
     const before = drawn?.selection;
     const sameLines =
       before !== undefined &&
@@ -328,12 +335,13 @@ export function mountTrendChart(root: HTMLElement, { explorer, store }: Explorer
   let frame = 0;
   const redraw = () => {
     cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(() => draw(store.get()));
+    frame = requestAnimationFrame(() => draw(shown(store.get())));
   };
   new ResizeObserver(() => {
     if (Math.max(220, Math.round(root.clientWidth)) !== width) redraw();
   }).observe(root);
   void document.fonts?.ready.then(redraw);
+  phone.addEventListener('change', redraw);
 
-  draw(store.get());
+  draw(shown(store.get()));
 }

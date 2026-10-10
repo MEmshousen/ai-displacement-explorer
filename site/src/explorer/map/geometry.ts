@@ -7,6 +7,7 @@ import { feature } from 'topojson-client';
 import type { GeometryCollection, Topology } from 'topojson-specification';
 import atlas from 'world-atlas/countries-110m.json';
 import { ISO_NUMERIC, MARKERS } from './countries';
+import { spreadPoints } from './taps';
 
 export interface CountryShape {
   /** The ISO3 code of a dataset country, or null for a country the dataset does not cover. */
@@ -21,6 +22,12 @@ export interface CountryMarker {
   readonly iso3: string;
   readonly x: number;
   readonly y: number;
+  /**
+   * Where the marker is drawn on a phone, where markers are larger for a finger: the same place,
+   * unless that would put it on top of a neighbour's marker, as Kuwait's and Qatar's would be.
+   */
+  readonly phoneX: number;
+  readonly phoneY: number;
   /** Whether the country also has a shape; if not, the marker is all there is of it. */
   readonly hasShape: boolean;
 }
@@ -28,6 +35,10 @@ export interface CountryMarker {
 export interface MapGeometry {
   readonly width: number;
   readonly height: number;
+  /** The radius of a small country's marker, in the map's units. */
+  readonly markerRadius: number;
+  /** The larger radius used on a phone, where the whole map is only about 300px wide. */
+  readonly phoneMarkerRadius: number;
   readonly shapes: readonly CountryShape[];
   readonly markers: readonly CountryMarker[];
 }
@@ -35,6 +46,12 @@ export interface MapGeometry {
 // A wide frame of whole units, so no coordinate needs a decimal point.
 const WIDTH = 7200;
 const ANTARCTICA = '010';
+
+const MARKER_RADIUS = WIDTH / 160;
+// About 5px on a 390px phone: large enough to see and to aim at.
+const PHONE_MARKER_RADIUS = 110;
+/** The least distance between two phone markers: both radii, and room for their outlines. */
+const PHONE_MARKER_GAP = 2 * PHONE_MARKER_RADIUS + 30;
 
 /**
  * Rewrites path data made only of absolute "M", "L" and "Z" commands with whole-number
@@ -101,10 +118,23 @@ export function buildMapGeometry(): MapGeometry {
     .filter((shape) => shape.d !== '');
 
   const drawn = new Set(shapes.map((shape) => shape.iso3));
-  const markers = Object.entries(MARKERS).map(([iso3, location]) => {
+  const placed = Object.entries(MARKERS).map(([iso3, location]) => {
     const [x, y] = projection([location[0], location[1]])!;
     return { iso3, x: Math.round(x), y: Math.round(y), hasShape: drawn.has(iso3) };
   });
+  const onPhone = spreadPoints(placed, PHONE_MARKER_GAP);
+  const markers = placed.map((marker, index) => ({
+    ...marker,
+    phoneX: Math.round(onPhone[index].x),
+    phoneY: Math.round(onPhone[index].y),
+  }));
 
-  return { width: WIDTH, height: Math.ceil(bottom), shapes, markers };
+  return {
+    width: WIDTH,
+    height: Math.ceil(bottom),
+    markerRadius: MARKER_RADIUS,
+    phoneMarkerRadius: PHONE_MARKER_RADIUS,
+    shapes,
+    markers,
+  };
 }

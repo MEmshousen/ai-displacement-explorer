@@ -118,10 +118,10 @@ describe('legend', () => {
         hundredths.map((value) => -value),
       ),
     );
-    expect(netChange.boundaries).toEqual(['-20.8%', '-40.6%', '-60.4%', '-80.2%']);
+    expect(netChange.boundaries).toEqual(['−20.8%', '−40.6%', '−60.4%', '−80.2%']);
     expect(netChange.classes.map((entry) => entry.step)).toEqual([1, 2, 3, 4, 5]);
-    expect(netChange.classes[0].range).toBe('-20.8% or more');
-    expect(netChange.classes[4].range).toBe('Under -80.2%');
+    expect(netChange.classes[0].range).toBe('−20.8% or more');
+    expect(netChange.classes[4].range).toBe('Under −80.2%');
   });
 
   it('has a single entry, named by its value, when every value is the same', () => {

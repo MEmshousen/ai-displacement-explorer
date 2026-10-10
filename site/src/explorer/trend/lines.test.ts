@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest';
 import type { Explorer } from '../../data/explorer';
 import type { Selection } from '../../selection';
 import {
+  endLabel,
   onlyGlobalAverage,
   readoutText,
   trendLines,
   trendSubtitle,
   trendSummary,
   trendTitle,
+  withoutPinned,
 } from './lines';
 
 const NAMES: Record<string, string> = { DEU: 'Germany', BRA: 'Brazil', JPN: 'Japan', NGA: 'Nigeria' };
@@ -63,6 +65,40 @@ describe('trendLines', () => {
   it('draws at most five lines', () => {
     const lines = trendLines(selection({ country: 'NGA', pinned: ['DEU', 'BRA', 'JPN'] }), explorer);
     expect(lines).toHaveLength(5);
+  });
+});
+
+describe('withoutPinned', () => {
+  it('leaves the pinned countries out and keeps the rest of the Selection', () => {
+    const arrived = selection({ country: 'DEU', sector: 'Finance & Banking', pinned: ['JPN', 'BRA'] });
+    expect(withoutPinned(arrived)).toEqual({ ...arrived, pinned: [] });
+    // The shared Selection is not touched, so its address keeps the pins.
+    expect(arrived.pinned).toEqual(['JPN', 'BRA']);
+  });
+
+  it('gives back the same Selection when nothing is pinned', () => {
+    const plain = selection({ country: 'DEU' });
+    expect(withoutPinned(plain)).toBe(plain);
+  });
+
+  it('draws and names a phone chart as if nothing were pinned', () => {
+    const lines = trendLines(withoutPinned(selection({ country: 'DEU', pinned: ['DEU', 'JPN'] })), explorer);
+    expect(lines.map((line) => line.key)).toEqual(['DEU', 'global']);
+    expect(lines[0]).toMatchObject({ pinned: false, slot: null });
+    expect(trendTitle(lines)).toBe('Germany against the global average');
+
+    const onlyPins = trendLines(withoutPinned(selection({ pinned: ['JPN'] })), explorer);
+    expect(onlyGlobalAverage(onlyPins)).toBe(true);
+    expect(trendTitle(onlyPins)).toBe('The global average over time');
+  });
+});
+
+describe('endLabel', () => {
+  it('shortens only the global average, and only on a narrow chart', () => {
+    const [germany, average] = trendLines(selection({ country: 'DEU' }), explorer);
+    expect(endLabel(average, false)).toBe('Global average');
+    expect(endLabel(average, true)).toBe('Global');
+    expect(endLabel(germany, true)).toBe('Germany');
   });
 });
 

@@ -3,7 +3,7 @@
 
 import { scaleLinear } from 'd3-scale';
 import { line as lineShape } from 'd3-shape';
-import { getMetric, type MetricId } from '../../selection';
+import { getMetric, trueMinus, type MetricId } from '../../selection';
 
 export interface YAxis {
   /** The rounded range the axis covers, low then high. */
@@ -40,7 +40,8 @@ export function yAxis(values: readonly (number | null)[], tickCount = 4): YAxis 
 
 /**
  * Writes an axis tick in the metric's style with only the decimals the ticks need: "5%" rather
- * than "5.0%", but "2.5%" when the ticks are 2.5 points apart. Signed metrics keep their plus.
+ * than "5.0%", but "2.5%" when the ticks are 2.5 points apart. Signed metrics keep their plus,
+ * and a negative tick takes a true minus sign.
  */
 export function formatTick(metric: MetricId, value: number, ticks: readonly number[]): string {
   const { style, signed } = getMetric(metric).format;
@@ -50,12 +51,25 @@ export function formatTick(metric: MetricId, value: number, ticks: readonly numb
   while (digits < 3 && ticks.some((tick) => Math.abs(shown(tick) * 10 ** digits - Math.round(shown(tick) * 10 ** digits)) > 1e-6)) {
     digits++;
   }
-  return new Intl.NumberFormat('en-US', {
-    style: style === 'percent' ? 'percent' : 'decimal',
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-    signDisplay: signed ? 'exceptZero' : 'negative',
-  }).format(value);
+  return trueMinus(
+    new Intl.NumberFormat('en-US', {
+      style: style === 'percent' ? 'percent' : 'decimal',
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+      signDisplay: signed ? 'exceptZero' : 'negative',
+    }).format(value),
+  );
+}
+
+/** Below this width the chart is "narrow": a phone, or half of a tablet's or small laptop's panel. */
+export const NARROW_CHART = 360;
+
+/**
+ * How much of the chart's width the names at the line ends may take; a longer name is cut short
+ * with an ellipsis. A narrow chart gives them less, so the plot keeps most of the width.
+ */
+export function endLabelRoom(width: number): number {
+  return width < NARROW_CHART ? Math.max(64, width * 0.28) : width * 0.34;
 }
 
 export interface YearTick {

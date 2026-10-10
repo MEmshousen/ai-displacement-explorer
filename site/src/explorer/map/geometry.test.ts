@@ -62,6 +62,25 @@ describe('the drawn map', () => {
     }
   });
 
+  it('moves only the markers that would overlap on a phone, and clears them of each other', () => {
+    const { markers, phoneMarkerRadius } = geometry;
+    const moved = markers.filter((marker) => marker.phoneX !== marker.x || marker.phoneY !== marker.y);
+    expect(moved.map((marker) => marker.iso3).sort()).toEqual(['KWT', 'QAT']);
+
+    for (const a of markers) {
+      for (const b of markers) {
+        if (a === b) continue;
+        const apart = Math.hypot(a.phoneX - b.phoneX, a.phoneY - b.phoneY);
+        expect(apart).toBeGreaterThan(2 * phoneMarkerRadius);
+      }
+    }
+    // Neither is carried far: less than one phone marker's width from where the country is.
+    for (const marker of moved) {
+      const carried = Math.hypot(marker.phoneX - marker.x, marker.phoneY - marker.y);
+      expect(carried).toBeLessThan(2 * phoneMarkerRadius);
+    }
+  });
+
   it('writes compact paths', () => {
     const size = geometry.shapes.reduce((total, shape) => total + shape.d.length, 0);
     expect(size).toBeLessThan(60_000);

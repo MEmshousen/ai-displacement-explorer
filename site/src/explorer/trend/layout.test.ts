@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatTick, linePath, spreadLabels, yAxis, yearTicks } from './layout';
+import { endLabelRoom, formatTick, linePath, NARROW_CHART, spreadLabels, yAxis, yearTicks } from './layout';
 
 describe('yAxis', () => {
   it('starts at zero for values that sit near it, as Displacement does', () => {
@@ -58,7 +58,27 @@ describe('formatTick', () => {
 
   it('signs Net change, but not zero', () => {
     const ticks = [-0.02, 0, 0.02];
-    expect(ticks.map((tick) => formatTick('net-change', tick, ticks))).toEqual(['-2%', '0%', '+2%']);
+    expect(ticks.map((tick) => formatTick('net-change', tick, ticks))).toEqual(['−2%', '0%', '+2%']);
+  });
+});
+
+describe('endLabelRoom', () => {
+  it('gives the names a third of a chart with room to spare', () => {
+    expect(endLabelRoom(600)).toBeCloseTo(204);
+    expect(endLabelRoom(NARROW_CHART)).toBeCloseTo(NARROW_CHART * 0.34);
+  });
+
+  it('gives them less of a narrow chart, so the plot keeps more than half of it', () => {
+    for (const width of [240, 287, 320, 359]) {
+      const room = endLabelRoom(width);
+      expect(room).toBeLessThan(width * 0.34);
+      // 14px between the plot and the names, and about 36px for the axis on the left.
+      expect(width - room - 14 - 36).toBeGreaterThan(width * 0.5);
+    }
+  });
+
+  it('never leaves less than a short name needs', () => {
+    expect(endLabelRoom(200)).toBe(64);
   });
 });
 

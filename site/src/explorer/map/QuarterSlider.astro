@@ -101,6 +101,19 @@ const last = quarters[quarters.length - 1];
     color: var(--chart-text-strong);
     text-align: right;
   }
+
+  /* Touch widths, and any touch screen: 44px targets. */
+  @media (max-width: 979px), (pointer: coarse) {
+    .play {
+      min-height: 2.75rem;
+    }
+    input {
+      height: 2.75rem;
+    }
+    .now {
+      line-height: 2.75rem;
+    }
+  }
 </style>
 
 <script>

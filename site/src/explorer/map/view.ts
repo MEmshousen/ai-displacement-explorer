@@ -5,7 +5,15 @@
 import { explorerPage } from '../page';
 import { formatMetric, type MetricId, type Selection } from '../../selection';
 import { colourClasses, darkerMeans, legend, stepOf, type ColourClasses } from './classes';
-import { countryLabel, mapSubtitle, mapSummary, mapTitle } from './words';
+import { nearestWithin } from './taps';
+import { countryLabel, mapHint, mapSubtitle, mapSummary, mapTitle } from './words';
+
+/** How far from a marker's centre a finger still counts as on it: half of a 44px target. */
+const TAP_REACH = 22;
+/** The same, where the tap landed on a neighbouring country with data, which must stay tappable. */
+const TAP_REACH_ON_LAND = 12;
+/** How long a tapped country's tooltip stays up. A finger cannot move away to dismiss it. */
+const TAP_TOOLTIP_MS = 3000;
 
 /** Everything drawn for one dataset country: a shape, a marker, or both. */
 interface Drawn {
@@ -30,6 +38,7 @@ async function mount(root: HTMLElement): Promise<void> {
   const frame = svg.parentElement!;
   const tooltip = root.querySelector<HTMLElement>('[data-map-tooltip]')!;
   const summary = root.querySelector<HTMLElement>('[data-map-summary]')!;
+  const hint = root.querySelector<HTMLElement>('[data-map-hint]')!;
   const legendTitle = root.querySelector<HTMLElement>('[data-legend-title]')!;
   const legendSwatches = root.querySelector<HTMLElement>('[data-legend-swatches]')!;
   const legendMarks = root.querySelector<HTMLElement>('[data-legend-marks]')!;
@@ -131,6 +140,10 @@ async function mount(root: HTMLElement): Promise<void> {
     if (target.marker) {
       ring.setAttribute('cx', target.marker.getAttribute('cx')!);
       ring.setAttribute('cy', target.marker.getAttribute('cy')!);
+      // Where the marker is on a phone, which the stylesheet reads in place of cx and cy.
+      for (const name of ['--phone-cx', '--phone-cy']) {
+        ring.style.setProperty(name, target.marker.style.getPropertyValue(name));
+      }
     }
     ring.setAttribute('visibility', target.marker ? 'visible' : 'hidden');
   };
@@ -162,6 +175,7 @@ async function mount(root: HTMLElement): Promise<void> {
 
     if (title) title.textContent = mapTitle(selection);
     if (subtitle) subtitle.textContent = mapSubtitle(selection);
+    hint.textContent = mapHint(selection.country !== null);
     showLegend(classes);
     summary.textContent =
       mapSummary(
@@ -213,7 +227,10 @@ async function mount(root: HTMLElement): Promise<void> {
     outline('hovered', country ? { d: country.shape?.getAttribute('d'), marker: country.marker } : { d: element.getAttribute('d') });
   };
 
+  let tapTimer: number | undefined;
+
   const hideTooltip = () => {
+    window.clearTimeout(tapTimer);
     tipped = undefined;
     tooltip.hidden = true;
     outline('hovered', {});
@@ -222,18 +239,47 @@ async function mount(root: HTMLElement): Promise<void> {
   const countryAt = (target: EventTarget | null): SVGElement | null =>
     target instanceof SVGElement ? target.closest<SVGElement>('[data-country], [data-name]') : null;
 
-  const onPointer = (event: PointerEvent) => {
+  /** Whether the last press on the map was a finger or a pen rather than a mouse. */
+  let touched = false;
+
+  // A mouse hovers: the tooltip follows it and goes when it leaves. A finger does not, so its
+  // tooltip is put up by the tap itself, in the click handler below.
+  svg.addEventListener('pointermove', (event) => {
+    if (event.pointerType !== 'mouse') return;
     const element = countryAt(event.target);
     tippedByFocus = false;
+    window.clearTimeout(tapTimer);
     if (element) showTooltip(element, event.clientX, event.clientY);
     else hideTooltip();
-  };
-  svg.addEventListener('pointermove', onPointer);
-  // A tap has no hover before it, so the press itself shows the tooltip.
-  svg.addEventListener('pointerdown', onPointer);
+  });
+  svg.addEventListener('pointerdown', (event) => {
+    touched = event.pointerType !== 'mouse';
+  });
   svg.addEventListener('pointerleave', (event) => {
     if (event.pointerType === 'mouse') hideTooltip();
   });
+  // A tap anywhere off the map takes a tapped country's tooltip down.
+  document.addEventListener('pointerdown', (event) => {
+    if (touched && tipped && !svg.contains(event.target as Node)) hideTooltip();
+  });
+
+  const markerCentres = [...drawn.values()].flatMap(({ marker }) => (marker ? [marker] : []));
+  /**
+   * The country a click was meant for. A finger is wider than a marker, so a tap goes to the
+   * nearest marker within reach, if there is one: a full 44px target over the sea and countries
+   * without data, a smaller one over a neighbour that has data of its own.
+   */
+  const meant = (event: MouseEvent): SVGElement | null => {
+    const direct = countryAt(event.target);
+    if (!touched) return direct;
+    const onLand = direct instanceof SVGPathElement && direct.dataset.country !== undefined;
+    const centres = markerCentres.map((element) => {
+      const box = element.getBoundingClientRect();
+      return { element, x: box.left + box.width / 2, y: box.top + box.height / 2 };
+    });
+    const reach = onLand ? TAP_REACH_ON_LAND : TAP_REACH;
+    return nearestWithin({ x: event.clientX, y: event.clientY }, centres, reach)?.element ?? direct;
+  };
 
   svg.addEventListener('focusin', (event) => {
     const element = countryAt(event.target);
@@ -258,11 +304,23 @@ async function mount(root: HTMLElement): Promise<void> {
   };
 
   svg.addEventListener('click', (event) => {
-    const element = countryAt(event.target);
+    const element = meant(event);
     const iso3 = element?.dataset.country;
     if (iso3 && drawn.has(iso3)) toggle(iso3);
     // A click on the sea clears the country; one on a country without data changes nothing.
     else if (!element) store.update({ country: null });
+
+    if (!touched) return;
+    // A tap names what it landed on for a few seconds, unless it cleared the selected country.
+    const cleared = iso3 !== undefined && store.get().country !== iso3;
+    if (!element || cleared) {
+      hideTooltip();
+      return;
+    }
+    tippedByFocus = false;
+    showTooltip(element, event.clientX, event.clientY);
+    window.clearTimeout(tapTimer);
+    tapTimer = window.setTimeout(hideTooltip, TAP_TOOLTIP_MS);
   });
 
   svg.addEventListener('keydown', (event) => {

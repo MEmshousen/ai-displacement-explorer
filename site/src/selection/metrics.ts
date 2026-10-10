@@ -111,11 +111,20 @@ export function getMetric(id: MetricId): Metric {
 /** Shown in place of a number when a metric has no value for the rows in view. */
 export const NO_VALUE = 'No value';
 
+/**
+ * A true minus sign (U+2212) in place of the hyphen a number formatter writes, so a negative
+ * number reads the same in the Headline findings and in every view of the Explorer.
+ */
+export function trueMinus(text: string): string {
+  return text.replace(/-/g, '−');
+}
+
 const formatters = new Map<MetricId, Intl.NumberFormat>();
 
 /**
- * Writes a metric's value for display: "4.1%", "-0.6%", "75", "0.83". Null is "no value", which
- * Replacement rate gives when nothing was displaced.
+ * Writes a metric's value for display: "4.1%", "−0.6%", "75", "0.83". A negative number takes a
+ * true minus sign, not a hyphen. Null is "no value", which Replacement rate gives when nothing was
+ * displaced.
  */
 export function formatMetric(id: MetricId, value: number | null): string {
   if (value === null || !Number.isFinite(value)) return NO_VALUE;
@@ -132,5 +141,5 @@ export function formatMetric(id: MetricId, value: number | null): string {
     });
     formatters.set(id, formatter);
   }
-  return formatter.format(value);
+  return trueMinus(formatter.format(value));
 }

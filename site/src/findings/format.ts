@@ -1,21 +1,16 @@
 // How the Headline findings write their numbers, in the text, the summary strip and the charts.
 // Built on the Selection's metric formats so a figure reads the same here as in the Explorer.
 
-import { formatMetric } from '../selection';
-
-/** A true minus sign in place of the hyphen the number formatter writes. */
-function typeset(text: string): string {
-  return text.replace(/-/g, '−');
-}
+import { formatMetric, trueMinus } from '../selection';
 
 /** A share of the workforce to one decimal place: 0.0869 as "8.7%". */
 export function share(value: number): string {
-  return typeset(formatMetric('displacement', value));
+  return formatMetric('displacement', value);
 }
 
 /** Net change to one decimal place, unsigned unless negative: -0.0327 as "−3.3%". */
 export function netChange(value: number): string {
-  return typeset(formatMetric('displacement', value));
+  return formatMetric('displacement', value);
 }
 
 /** New roles per 100 displaced, as a whole number: 74.7 as "75". */
@@ -25,7 +20,7 @@ export function replacementRate(value: number | null): string {
 
 /** A share as a whole percentage: 0.608 as "61%". Used for women's shares and axis ticks. */
 export function wholeShare(value: number): string {
-  return typeset(`${Math.round(value * 100)}%`);
+  return trueMinus(`${Math.round(value * 100)}%`);
 }
 
 /** The distance between two shares in whole percentage points: 0.79 and 0.95 give 16. */

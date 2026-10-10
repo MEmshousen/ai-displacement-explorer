@@ -107,5 +107,23 @@ subtitle and source line. Titles change with the Selection, so a view rewrites t
 through the `[data-view-title]` and `[data-view-subtitle]` elements of its pane. The sentence region
 sets the serif type for the sentence; the clickable words should use `--color-accent`.
 
-On a phone the regions stack in the order above. From 640px the two charts sit side by side under the
-map; from 980px the map is on the left and the charts are stacked on the right.
+Each pane reads the same way: a title, a subtitle that is a phrase with no full stop saying what is
+measured, the view, one small `.hint` line saying what choosing something does, then the source line.
+Numbers go through `formatMetric`, which writes a negative with a true minus sign (U+2212), as the
+Headline findings do.
+
+Widths:
+
+| Width          | Layout                                                                              |
+| :------------- | :---------------------------------------------------------------------------------- |
+| Under 640px    | Phone: the regions stack in the order above; the sentence is the only control        |
+| 640px to 819px | The same stack, with the pinned countries under the sentence                         |
+| 820px to 979px | The map full width, the two charts side by side under it                             |
+| From 980px     | The map on the left, the two charts stacked on the right                             |
+
+On a phone there is no pinning (`PHONE_QUERY` in `src/explorer/page.ts`): the pinned countries are
+hidden under the sentence and left off the trend chart, but a link that carries them keeps them in
+its address, so they are back on a wider screen. Up to 979px, and on any touch screen, every control
+in the Explorer is at least 44px tall. The map's countries are the exception, since most are only a
+few pixels across on a phone: the sentence's country picker reaches all 80, and a tap near a small
+country's marker counts as a tap on it.

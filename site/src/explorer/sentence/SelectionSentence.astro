@@ -232,7 +232,20 @@ const { words, gaps } = sentence(initial);
     color: var(--color-ink);
   }
 
-  /* Phone: the sentence alone is the control. */
+  /* Touch widths, and any touch screen: 44px targets. */
+  @media (max-width: 979px), (pointer: coarse) {
+    .pins ul :global(button) {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+    }
+    .pins > button,
+    .pins > select {
+      min-height: 2.75rem;
+    }
+  }
+
+  /* Phone: the sentence alone is the control. The trend chart leaves the pinned countries out at
+     the same width (PHONE_QUERY in ../page.ts). */
   @media (max-width: 639px) {
     .pins {
       display: none;

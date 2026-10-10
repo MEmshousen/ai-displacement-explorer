@@ -245,10 +245,13 @@ describe('units and number formats', () => {
     expect(formatMetric('women-share', 0.95)).toBe('95.0%');
   });
 
-  it('signs Net change', () => {
-    expect(formatMetric('net-change', -0.0058)).toBe('-0.6%');
+  it('signs Net change, with a true minus sign rather than a hyphen', () => {
+    expect(formatMetric('net-change', -0.0058)).toBe('−0.6%');
     expect(formatMetric('net-change', 0.012)).toBe('+1.2%');
     expect(formatMetric('net-change', 0)).toBe('0.0%');
+    expect(formatMetric('net-change', -0.0058)).not.toContain('-');
+    // Unsigned metrics too: the Sector bars can chart a falling metric.
+    expect(formatMetric('displacement', -0.0327)).toBe('−3.3%');
   });
 
   it('writes Replacement rate as a whole number and the AI adoption index to two places', () => {

@@ -15,10 +15,17 @@ export function mapTitle({ metric, sector, quarter }: MapSelection): string {
   return `${getMetric(metric).label} in ${sector ?? 'all Sectors'}, ${quarter}`;
 }
 
-/** What a value counts, and what the map is for. */
+/** What a value counts: "% of the Sector workforce, by country". */
 export function mapSubtitle({ metric }: MapSelection): string {
   const { unit } = getMetric(metric);
-  return `${unit.charAt(0).toUpperCase()}${unit.slice(1)}, by country. Choose a country to follow it in the other views.`;
+  return `${unit.charAt(0).toUpperCase()}${unit.slice(1)}, by country`;
+}
+
+/** The line under the map saying what choosing a country does. */
+export function mapHint(hasCountry: boolean): string {
+  return hasCountry
+    ? 'Choose the outlined country again to clear it.'
+    : 'Choose a country to follow it in the other views.';
 }
 
 /** "Germany: 4.1%". */

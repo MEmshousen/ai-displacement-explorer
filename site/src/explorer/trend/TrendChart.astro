@@ -1,6 +1,6 @@
 ---
 // The trend chart: the Selection's metric across every quarter, for the selected country, the
-// pinned countries and the global average. Drawn in the browser by ./chart.ts; this file holds
+// pinned countries (not on a phone, which has no pinning) and the global average. Drawn in the browser by ./chart.ts; this file holds
 // the frame it draws into and the look of every mark.
 //
 // Lines are told apart without relying on colour: each has its name at its end, its own stroke
@@ -21,7 +21,7 @@
     />
   </div>
   <div class="readout" data-trend-readout></div>
-  <p class="hint" data-trend-hint hidden>Click a country on the map to add its line here.</p>
+  <p class="hint" data-trend-hint hidden>Choose a country to add its line here.</p>
 </div>
 
 <script>
@@ -54,16 +54,18 @@
     /* A sideways drag reads the chart; an up or down drag still scrolls the page. */
     touch-action: pan-y;
   }
+  /* The same small line as under the map and the Sector bars. */
   .hint {
     margin-top: var(--space-2);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
+    font-size: var(--text-xs);
+    line-height: 1.25;
+    color: var(--chart-text-muted);
   }
 
   /* Everything below is drawn by the script, so it is styled through :global. */
   .trend :global(text) {
     font-family: var(--font-sans);
-    font-size: 11px;
+    font-size: var(--text-label);
     fill: var(--chart-text-muted);
   }
   .trend :global(.trend-grid) {
@@ -119,7 +121,7 @@
     stroke-width: 0.75;
   }
   .trend :global(.trend-label) {
-    font-size: 12px;
+    font-size: var(--text-xs);
     font-weight: 500;
     fill: var(--label);
     /* A halo, so a label stays readable where a line passes behind it. */
@@ -154,15 +156,17 @@
     stroke-dasharray: 2 2;
   }
 
-  /* The readout under the chart. */
+  /* The readout under the chart, in the type of the Sector bars and the map legend. */
   .readout {
-    margin-top: var(--space-2);
-    font-size: var(--text-sm);
+    margin-top: var(--space-3);
+    font-size: var(--text-xs);
+    line-height: 1.25;
   }
   .trend :global(.trend-readout-quarter) {
     font-family: var(--font-mono);
     font-size: var(--text-label);
     letter-spacing: 0.09em;
+    margin-bottom: var(--space-1);
     color: var(--color-faint);
   }
   .trend :global(.trend-readout-lines) {
@@ -174,7 +178,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding-block: 0.15rem;
+    padding-block: 0.3rem;
     border-top: 1px solid var(--chart-grid);
     color: var(--chart-text);
   }

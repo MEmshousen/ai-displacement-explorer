@@ -127,10 +127,10 @@ describe('the pane text', () => {
 
   it('says what the metric counts and which way the ranking runs', () => {
     expect(viewSubtitle(getMetric('displacement'))).toBe(
-      'Displacement (% of the Sector workforce), highest first.',
+      'Displacement (% of the Sector workforce), highest first',
     );
     expect(viewSubtitle(getMetric('replacement-rate'))).toBe(
-      'Replacement rate (new roles per 100 displaced), highest first.',
+      'Replacement rate (new roles per 100 displaced), highest first',
     );
   });
 

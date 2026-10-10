@@ -95,3 +95,8 @@ a {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+/* A table ignores a width narrower than its cells, and a hidden one that is hundreds of pixels wide
+   makes the whole page scroll sideways. As a block it takes the 1px; it is still read as a table. */
+table.visually-hidden {
+  display: block;
+}

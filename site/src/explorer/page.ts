@@ -10,6 +10,13 @@ export interface ExplorerPage {
   readonly store: SelectionStore;
 }
 
+/**
+ * The widths at which the Explorer is the phone version: the Selection sentence is the only
+ * control and there is no pinning. The same width is written out in the sentence's stylesheet
+ * (SelectionSentence.astro), which hides the pinned countries there.
+ */
+export const PHONE_QUERY = '(max-width: 639px)';
+
 let page: Promise<ExplorerPage> | undefined;
 
 export function explorerPage(): Promise<ExplorerPage> {

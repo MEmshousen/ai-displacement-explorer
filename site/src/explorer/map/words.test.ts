@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { countryLabel, mapSubtitle, mapSummary, mapTitle } from './words';
+import { countryLabel, mapHint, mapSubtitle, mapSummary, mapTitle } from './words';
 
 const all = { metric: 'displacement', sector: null, quarter: '2026-Q2' } as const;
 
@@ -13,18 +13,23 @@ describe('mapTitle', () => {
 });
 
 describe('mapSubtitle', () => {
-  it('starts with what a value counts', () => {
-    expect(mapSubtitle(all)).toMatch(/^% of the Sector workforce, by country\./);
-    expect(mapSubtitle({ ...all, metric: 'replacement-rate' })).toMatch(
-      /^New roles per 100 displaced, by country\./,
-    );
+  it('says what a value counts, as a phrase with no full stop like the other panes', () => {
+    expect(mapSubtitle(all)).toBe('% of the Sector workforce, by country');
+    expect(mapSubtitle({ ...all, metric: 'replacement-rate' })).toBe('New roles per 100 displaced, by country');
+  });
+});
+
+describe('mapHint', () => {
+  it('says how to choose a country and how to clear it', () => {
+    expect(mapHint(false)).toBe('Choose a country to follow it in the other views.');
+    expect(mapHint(true)).toBe('Choose the outlined country again to clear it.');
   });
 });
 
 describe('countryLabel', () => {
   it('writes the value in the metric format', () => {
     expect(countryLabel('displacement', { name: 'Germany', value: 0.0406 })).toBe('Germany: 4.1%');
-    expect(countryLabel('net-change', { name: 'Kenya', value: -0.006 })).toBe('Kenya: -0.6%');
+    expect(countryLabel('net-change', { name: 'Kenya', value: -0.006 })).toBe('Kenya: −0.6%');
     expect(countryLabel('replacement-rate', { name: 'Chile', value: null })).toBe('Chile: No value');
   });
 });

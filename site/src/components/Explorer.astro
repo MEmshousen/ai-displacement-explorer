@@ -25,7 +25,7 @@ import SectorBars from '../explorer/sectors/SectorBars.astro';
         <ViewPane
           region="map"
           title="World map"
-          subtitle="The chosen metric by country, for the chosen quarter."
+          subtitle="The chosen metric, by country"
         >
           <WorldMap />
           <div slot="controls" id="explorer-slider" data-region="slider">
@@ -47,7 +47,7 @@ import SectorBars from '../explorer/sectors/SectorBars.astro';
           <ViewPane
             region="sectors"
             title="Sector bars"
-            subtitle="The chosen metric for the ten Sectors, ranked."
+            subtitle="The chosen metric for the ten Sectors, highest first"
           >
             <SectorBars />
           </ViewPane>
@@ -72,7 +72,15 @@ import SectorBars from '../explorer/sectors/SectorBars.astro';
     line-height: 1.5;
   }
 
-  /* Phone: the map, then the trend chart, then the Sector bars, in one column. */
+  /* Touch widths, and any touch screen: each line of the sentence is as tall as a finger needs, so
+     every clickable word is a 44px target and no two of them overlap. */
+  @media (max-width: 979px), (pointer: coarse) {
+    .sentence {
+      line-height: max(1.5em, 2.75rem);
+    }
+  }
+
+  /* Phone and small tablet: the map, then the trend chart, then the Sector bars, in one column. */
   .views,
   .side {
     display: grid;
@@ -83,8 +91,9 @@ import SectorBars from '../explorer/sectors/SectorBars.astro';
     min-width: 0;
   }
 
-  /* Tablet: the map full width, the two charts side by side under it. */
-  @media (min-width: 640px) and (max-width: 979px) {
+  /* Tablet: the map full width, the two charts side by side under it. Not below 820px, where half
+     the panel would leave the trend chart's plot narrower than its own labels. */
+  @media (min-width: 820px) and (max-width: 979px) {
     .side {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
