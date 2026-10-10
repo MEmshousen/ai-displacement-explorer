@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { METRICS, getMetric } from './metrics';
+import { METRICS, NO_VALUE, formatMetric, getMetric } from './metrics';
 import {
   MAX_PINNED,
   applyPatch,
@@ -230,5 +230,34 @@ describe('applying a patch', () => {
   it('keeps the current value of a field the patch gets wrong', () => {
     const patch = { metric: 'nope', sector: 'Farming', quarter: null, country: 'XXX' };
     expect(applyPatch(full, patch, choices)).toEqual(full);
+  });
+});
+
+describe('units and number formats', () => {
+  it('gives every metric a unit', () => {
+    for (const metric of METRICS) expect(metric.unit).not.toBe('');
+    expect(getMetric('replacement-rate').unit).toBe('new roles per 100 displaced');
+  });
+
+  it('writes shares as percentages to one place', () => {
+    expect(formatMetric('displacement', 0.0406)).toBe('4.1%');
+    expect(formatMetric('wage-premium', 0.311)).toBe('31.1%');
+    expect(formatMetric('women-share', 0.95)).toBe('95.0%');
+  });
+
+  it('signs Net change', () => {
+    expect(formatMetric('net-change', -0.0058)).toBe('-0.6%');
+    expect(formatMetric('net-change', 0.012)).toBe('+1.2%');
+    expect(formatMetric('net-change', 0)).toBe('0.0%');
+  });
+
+  it('writes Replacement rate as a whole number and the AI adoption index to two places', () => {
+    expect(formatMetric('replacement-rate', 74.96)).toBe('75');
+    expect(formatMetric('ai-adoption', 0.83)).toBe('0.83');
+  });
+
+  it('writes "No value" where there is none', () => {
+    expect(formatMetric('replacement-rate', null)).toBe(NO_VALUE);
+    expect(NO_VALUE).toBe('No value');
   });
 });

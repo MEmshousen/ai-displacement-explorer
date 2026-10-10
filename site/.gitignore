@@ -22,3 +22,7 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# written by the data step (src/data/step) from the CSV at the repo root; never committed
+public/data/
+src/data/generated/
