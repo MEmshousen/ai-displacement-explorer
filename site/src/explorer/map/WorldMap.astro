@@ -1,0 +1,287 @@
+---
+// The world map. The country shapes are drawn here, at build time, so the page arrives with the
+// finished SVG and the browser downloads no geometry. The script (view.ts) only fills the
+// countries from the Selection and handles hovering, focusing and clicking.
+import { buildMapGeometry } from './geometry';
+
+const { width, height, shapes, markers } = buildMapGeometry();
+const covered = shapes.filter((shape) => shape.iso3 !== null);
+const uncovered = shapes.filter((shape) => shape.iso3 === null);
+
+/** The radius of a small country's marker, in the map's units. */
+const markerRadius = width / 160;
+---
+
+<div class="map" data-map>
+  <div class="frame">
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      role="group"
+      aria-label="World map. Each country with data is a button that selects it."
+      aria-describedby="explorer-map-summary explorer-map-classes"
+      data-map-svg
+    >
+      <rect class="sea" width={width} height={height}></rect>
+      <g class="uncovered">
+        {uncovered.map((shape) => <path d={shape.d} data-name={shape.name} />)}
+      </g>
+      <g class="covered">
+        {covered.map((shape) => <path d={shape.d} data-country={shape.iso3} role="button" tabindex="-1" />)}
+      </g>
+      <path class="outline hovered" data-outline="hovered"></path>
+      <path class="outline selected" data-outline="selected"></path>
+      <g class="halos">
+        {markers.map((marker) => <circle cx={marker.x} cy={marker.y} r={markerRadius} />)}
+      </g>
+      <g class="markers">
+        {
+          markers.map((marker) =>
+            marker.hasShape ? (
+              // The country's shape is its button; the marker is a bigger target for a pointer.
+              <circle cx={marker.x} cy={marker.y} r={markerRadius} data-country={marker.iso3} aria-hidden="true" />
+            ) : (
+              <circle
+                cx={marker.x}
+                cy={marker.y}
+                r={markerRadius}
+                data-country={marker.iso3}
+                role="button"
+                tabindex="-1"
+              />
+            ),
+          )
+        }
+      </g>
+      <circle class="outline hovered" r={markerRadius} data-ring="hovered" visibility="hidden"></circle>
+      <circle class="outline selected" r={markerRadius} data-ring="selected" visibility="hidden"></circle>
+    </svg>
+    <div class="tooltip" data-map-tooltip aria-hidden="true" hidden></div>
+  </div>
+
+  <p class="visually-hidden" id="explorer-map-summary" data-map-summary></p>
+  <p class="status" role="status" data-map-status></p>
+
+  <div class="legend">
+    <p class="legend-title" data-legend-title>&nbsp;</p>
+    <div class="keys">
+      <div class="ramp" aria-hidden="true">
+        <div class="swatches" data-legend-swatches></div>
+        <div class="marks" data-legend-marks></div>
+      </div>
+      <p class="visually-hidden" id="explorer-map-classes" data-legend-text></p>
+      <span class="key"><i class="swatch"></i>No data</span>
+      <span class="key">
+        <i class="dot"></i>Small country, drawn larger
+      </span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .frame {
+    position: relative;
+  }
+
+  svg {
+    overflow: visible;
+  }
+  .sea {
+    fill: transparent;
+  }
+  path,
+  circle {
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Countries: grey until the script gives a country its step on the ramp. */
+  .uncovered path,
+  .covered path,
+  .markers circle {
+    fill: var(--chart-no-data);
+    stroke: var(--chart-bg);
+    stroke-width: 0.6px;
+    stroke-linejoin: round;
+    outline: none;
+  }
+  .covered path,
+  .markers circle {
+    cursor: pointer;
+  }
+  .markers circle {
+    stroke: var(--chart-neutral-strong);
+    stroke-width: 1px;
+  }
+  /* A paper-coloured ring behind each marker, so it shows on dark land as well as on the sea. */
+  .halos circle {
+    fill: none;
+    stroke: var(--chart-bg);
+    stroke-width: 4px;
+    pointer-events: none;
+  }
+  .covered path[data-step='1'],
+  .markers circle[data-step='1'] {
+    fill: var(--chart-ramp-1);
+  }
+  .swatches :global([data-step='1']) {
+    background: var(--chart-ramp-1);
+  }
+  .covered path[data-step='2'],
+  .markers circle[data-step='2'] {
+    fill: var(--chart-ramp-2);
+  }
+  .swatches :global([data-step='2']) {
+    background: var(--chart-ramp-2);
+  }
+  .covered path[data-step='3'],
+  .markers circle[data-step='3'] {
+    fill: var(--chart-ramp-3);
+  }
+  .swatches :global([data-step='3']) {
+    background: var(--chart-ramp-3);
+  }
+  .covered path[data-step='4'],
+  .markers circle[data-step='4'] {
+    fill: var(--chart-ramp-4);
+  }
+  .swatches :global([data-step='4']) {
+    background: var(--chart-ramp-4);
+  }
+  .covered path[data-step='5'],
+  .markers circle[data-step='5'] {
+    fill: var(--chart-ramp-5);
+  }
+  .swatches :global([data-step='5']) {
+    background: var(--chart-ramp-5);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .covered path,
+    .markers circle {
+      transition: fill 0.3s ease;
+    }
+  }
+
+  /* The hovered or focused country, and the selected one, are redrawn on top as outlines. */
+  .outline {
+    fill: none;
+    stroke: var(--chart-selected);
+    stroke-linejoin: round;
+    pointer-events: none;
+  }
+  .hovered {
+    stroke-width: 1.25px;
+  }
+  .selected {
+    stroke-width: 2px;
+  }
+
+  /* On a phone the map is half the size, so the markers are drawn larger to stay visible. */
+  @media (max-width: 639px) {
+    .markers circle,
+    .halos circle,
+    circle.outline {
+      r: 68px;
+    }
+  }
+
+  .tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    max-width: 14rem;
+    padding: 0.3rem 0.55rem;
+    background: var(--color-inverse);
+    color: var(--color-on-inverse);
+    font-size: var(--text-sm);
+    line-height: 1.3;
+    pointer-events: none;
+  }
+  .tooltip :global(strong) {
+    display: block;
+    font-weight: 600;
+  }
+  .tooltip :global(span) {
+    font-family: var(--font-mono);
+  }
+
+  .status:empty {
+    display: none;
+  }
+  .status {
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--chart-text-strong);
+  }
+
+  .legend {
+    margin-top: var(--space-3);
+    font-size: var(--text-xs);
+    color: var(--chart-text);
+  }
+  .legend-title {
+    margin-bottom: 0.45rem;
+    font-weight: 500;
+    color: var(--chart-text-strong);
+  }
+  .keys {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: start;
+    gap: 0.6rem 1.4rem;
+  }
+  .ramp {
+    flex: 0 1 17rem;
+    min-width: min(100%, 15rem);
+    /* The swatches, then the boundaries under them, held open before the script fills them. */
+    min-height: 2rem;
+  }
+  .swatches {
+    display: flex;
+    height: 0.7rem;
+  }
+  .swatches :global(i) {
+    flex: 1;
+    /* A hairline between steps, so they do not rely on telling two blues apart. */
+    box-shadow: inset -1px 0 0 var(--chart-bg);
+  }
+  .marks {
+    position: relative;
+    height: 1.2rem;
+    margin-top: 0.15rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--chart-text);
+  }
+  .marks :global(span) {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    line-height: 1;
+    min-height: 0.7rem;
+  }
+  .swatch {
+    width: 1.4rem;
+    height: 0.7rem;
+    background: var(--chart-no-data);
+  }
+  .dot {
+    width: 0.7rem;
+    height: 0.7rem;
+    border: 1px solid var(--chart-neutral-strong);
+    border-radius: 50%;
+    background: var(--chart-ramp-3);
+  }
+</style>
+
+<script>
+  import { mountMap } from './view';
+
+  const root = document.querySelector<HTMLElement>('[data-map]');
+  if (root) void mountMap(root);
+</script>
