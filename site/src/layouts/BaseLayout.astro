@@ -10,6 +10,7 @@ import '@fontsource/ibm-plex-mono/latin-500.css';
 import '../styles/global.css';
 import Masthead from '../components/Masthead.astro';
 import Footer from '../components/Footer.astro';
+import { THEME_STORAGE_KEY } from '../theme/theme';
 
 interface Props {
   title: string;
@@ -29,6 +30,15 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+    <meta name="color-scheme" content="light dark" />
+    {/* Before first paint: a theme chosen on an earlier visit goes on the root element, so the page
+        never flashes the other one. With no choice, tokens.css follows the system setting. */}
+    <script is:inline define:vars={{ key: THEME_STORAGE_KEY }}>
+      try {
+        const theme = localStorage.getItem(key);
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
     <link rel="icon" href={`${base}favicon.ico`} />
     <title>{title}</title>

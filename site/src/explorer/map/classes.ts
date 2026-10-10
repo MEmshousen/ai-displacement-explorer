@@ -1,6 +1,6 @@
 // The map's colour classes: up to five, with boundaries at the fifths of every value the metric
 // takes in the Sector across all quarters. They are worked out once per metric and Sector and do
-// not move with the quarter, so a country that darkens while the quarters play has really changed.
+// not move with the quarter, so a country that changes colour while the quarters play has really changed.
 
 import { quantileSorted } from 'd3-array';
 import { formatMetric, getMetric, type MetricId } from '../../selection';
@@ -17,8 +17,9 @@ export interface ColourClasses {
    */
   readonly boundaries: readonly number[];
   /**
-   * The ramp step, 1 (lightest) to 5 (darkest), of each class from the lowest values to the
-   * highest. The steps run the other way for a metric whose low values are the dark end.
+   * The ramp step, 1 (the weak end) to 5 (the strong end), of each class from the lowest values to
+   * the highest. The steps run the other way for a metric whose low values are the strong end.
+   * The strong end is the darkest colour in the light theme and the lightest in the dark theme.
    */
   readonly steps: readonly number[];
   /** The lowest and highest values the classes were built from, rounded; null if there were none. */
@@ -26,28 +27,33 @@ export interface ColourClasses {
 }
 
 /**
- * Which end of a metric the darkest colour marks. Net change is negative where roles were lost,
- * so its low end is the dark one: on every metric about roles lost, darker means more lost.
+ * Which end of a metric the strong end of the ramp marks. Net change is negative where roles were
+ * lost, so its low end is the strong one: on every metric about roles lost, stronger means more lost.
  */
-export function darkEnd(metric: MetricId): 'high' | 'low' {
+export function strongEnd(metric: MetricId): 'high' | 'low' {
   return metric === 'net-change' ? 'low' : 'high';
 }
 
-/** What the legend says the dark end means. */
-export function darkerMeans(metric: MetricId): string {
+/**
+ * What the legend says the strong end means. The scale is always drawn with that end on the right,
+ * and the sentence names it by its place, not its shade: the strong end is the darkest colour in
+ * one theme and the lightest in the other.
+ */
+export function scaleMeans(metric: MetricId): string {
+  const most = 'The right-hand end of the scale marks the';
   switch (metric) {
     case 'displacement':
-      return 'Darker means more Displacement';
+      return `${most} most Displacement`;
     case 'net-change':
-      return 'Darker means a larger net loss of roles';
+      return `${most} largest net loss of roles`;
     case 'replacement-rate':
-      return 'Darker means a higher Replacement rate';
+      return `${most} highest Replacement rate`;
     case 'ai-adoption':
-      return 'Darker means more AI adoption';
+      return `${most} most AI adoption`;
     case 'wage-premium':
-      return 'Darker means a higher wage premium';
+      return `${most} highest wage premium`;
     case 'women-share':
-      return "Darker means a higher women's share";
+      return `${most} highest women's share`;
   }
 }
 
@@ -84,7 +90,7 @@ export function colourClasses(metric: MetricId, values: readonly (number | null)
   return {
     metric,
     boundaries,
-    steps: darkEnd(metric) === 'low' ? steps.reverse() : steps,
+    steps: strongEnd(metric) === 'low' ? steps.reverse() : steps,
     extent: sorted.length === 0 ? null : [sorted[0], sorted[sorted.length - 1]],
   };
 }
@@ -109,7 +115,7 @@ export interface LegendClass {
 }
 
 export interface Legend {
-  /** The classes from the lightest colour to the darkest. */
+  /** The classes from the weak end of the ramp to the strong end: left to right in the legend. */
   readonly classes: readonly LegendClass[];
   /** The boundary between each class and the next, in the same order, in the metric's format. */
   readonly boundaries: readonly string[];
@@ -122,7 +128,7 @@ function everyValue({ metric, extent }: ColourClasses): string {
   return lowest === highest ? lowest : `${lowest} to ${highest}`;
 }
 
-/** The legend, lightest first, so it reads low to high except where the low end is the dark one. */
+/** The legend, weak end first, so it reads low to high except where the low end is the strong one. */
 export function legend(classes: ColourClasses): Legend {
   const marks = classes.boundaries.map((boundary) => formatMetric(classes.metric, boundary));
   const ranges = classes.steps.map((step, index) => {
@@ -135,7 +141,7 @@ export function legend(classes: ColourClasses): Legend {
     return { step, range };
   });
 
-  return darkEnd(classes.metric) === 'low'
+  return strongEnd(classes.metric) === 'low'
     ? { classes: ranges.reverse(), boundaries: marks.reverse() }
     : { classes: ranges, boundaries: marks };
 }

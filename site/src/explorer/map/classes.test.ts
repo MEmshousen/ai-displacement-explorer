@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { colourClasses, darkEnd, legend, roundToFormat, stepOf } from './classes';
+import { colourClasses, legend, roundToFormat, scaleMeans, stepOf, strongEnd } from './classes';
 
 /** 0.01, 0.02 ... 1.00: the fifths fall at 0.208, 0.406, 0.604 and 0.802. */
 const hundredths = Array.from({ length: 100 }, (_, index) => (index + 1) / 100);
@@ -46,9 +46,9 @@ describe('colourClasses', () => {
     expect(legend(classes).classes).toEqual([{ step: 3, range: 'No values' }]);
   });
 
-  it('runs the ramp the other way for Net change, whose low end is the dark one', () => {
-    expect(darkEnd('net-change')).toBe('low');
-    expect(darkEnd('displacement')).toBe('high');
+  it('runs the ramp the other way for Net change, whose low end is the strong one', () => {
+    expect(strongEnd('net-change')).toBe('low');
+    expect(strongEnd('displacement')).toBe('high');
     const classes = colourClasses(
       'net-change',
       hundredths.map((value) => -value),
@@ -61,7 +61,7 @@ describe('colourClasses', () => {
 describe('stepOf', () => {
   const classes = colourClasses('displacement', hundredths);
 
-  it('gives the lightest step to the lowest values and the darkest to the highest', () => {
+  it('gives the weak end of the ramp to the lowest values and the strong end to the highest', () => {
     expect(stepOf(classes, 0.01)).toBe(1);
     expect(stepOf(classes, 0.3)).toBe(2);
     expect(stepOf(classes, 0.99)).toBe(5);
@@ -82,7 +82,7 @@ describe('stepOf', () => {
     expect(stepOf(classes, 7)).toBe(5);
   });
 
-  it('gives the darkest step to the largest net loss', () => {
+  it('gives the strong end of the ramp to the largest net loss', () => {
     const netChange = colourClasses(
       'net-change',
       hundredths.map((value) => -value),
@@ -98,7 +98,7 @@ describe('stepOf', () => {
 });
 
 describe('legend', () => {
-  it('names each class and boundary in the metric format, lightest first', () => {
+  it('names each class and boundary in the metric format, weak end first', () => {
     expect(legend(colourClasses('displacement', hundredths))).toEqual({
       classes: [
         { step: 1, range: 'Under 20.8%' },
@@ -111,7 +111,7 @@ describe('legend', () => {
     });
   });
 
-  it('still reads lightest first for Net change, so its numbers fall', () => {
+  it('still reads weak end first for Net change, so its numbers fall', () => {
     const netChange = legend(
       colourClasses(
         'net-change',
@@ -135,5 +135,15 @@ describe('legend', () => {
     // The fifths all round to the lowest value, so no boundary can be drawn.
     const classes = colourClasses('ai-adoption', [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.52]);
     expect(legend(classes).classes).toEqual([{ step: 3, range: '0.50 to 0.52' }]);
+  });
+});
+
+describe('scaleMeans', () => {
+  it('names the end of the scale by its place, which is true in the light and the dark theme', () => {
+    expect(scaleMeans('displacement')).toBe('The right-hand end of the scale marks the most Displacement');
+    expect(scaleMeans('net-change')).toBe('The right-hand end of the scale marks the largest net loss of roles');
+    for (const metric of ['replacement-rate', 'ai-adoption', 'wage-premium', 'women-share'] as const) {
+      expect(scaleMeans(metric)).not.toMatch(/dark|light/i);
+    }
   });
 });

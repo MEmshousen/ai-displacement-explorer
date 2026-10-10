@@ -4,7 +4,7 @@
 
 import { explorerPage } from '../page';
 import { formatMetric, type MetricId, type Selection } from '../../selection';
-import { colourClasses, darkerMeans, legend, stepOf, type ColourClasses } from './classes';
+import { colourClasses, legend, scaleMeans, stepOf, type ColourClasses } from './classes';
 import { nearestWithin } from './taps';
 import { countryLabel, mapHint, mapSubtitle, mapSummary, mapTitle } from './words';
 
@@ -97,7 +97,7 @@ async function mount(root: HTMLElement): Promise<void> {
     legendShown = classes;
     const { classes: entries, boundaries } = legend(classes);
 
-    legendTitle.textContent = `${darkerMeans(classes.metric)}.`;
+    legendTitle.textContent = `${scaleMeans(classes.metric)}.`;
     legendSwatches.replaceChildren(
       ...entries.map((entry) => {
         const swatch = document.createElement('i');
@@ -116,8 +116,8 @@ async function mount(root: HTMLElement): Promise<void> {
       }),
     );
     legendText.textContent =
-      `Colour classes, lightest to darkest: ${entries.map((entry) => entry.range).join('; ')}. ` +
-      `${darkerMeans(classes.metric)}. Countries without data are grey.`;
+      `Colour classes, left to right on the scale: ${entries.map((entry) => entry.range).join('; ')}. ` +
+      `${scaleMeans(classes.metric)}. Countries without data are grey.`;
   };
 
   // --- Drawing the Selection ---------------------------------------------------------------

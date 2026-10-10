@@ -76,6 +76,43 @@ Build and deployment → Source → GitHub Actions**. Until that is done the wor
 The look is set by tokens in `src/styles/tokens.css`: page colours, the three font stacks, the type
 scale, spacing, and the chart colours. Use the tokens; do not hard-code a colour or a font.
 
+### Themes
+
+There are two themes, light and dark, and they are one design: the same type, layout and rules, with
+only the colour tokens changed. The dark theme is a near-black warm page with light ink, the accent
+blue lightened to read on dark, and orange still kept for a second data series.
+
+- The page follows the visitor's system setting (`prefers-color-scheme`) until they use the toggle in
+  the masthead. The choice is kept in `localStorage` under `theme` and put on the root element as
+  `data-theme="light"` or `data-theme="dark"`; the "System" button beside the toggle removes both.
+  The logic is in `src/theme/theme.ts`.
+- A small inline script in the head of `src/layouts/BaseLayout.astro` applies a stored choice before
+  first paint, so the page never flashes the other theme.
+- `tokens.css` holds the light values in `:root` and the dark values twice: under
+  `:root[data-theme='dark']` (dark was chosen) and under `prefers-color-scheme: dark` for
+  `:root:not([data-theme])` (no choice, and the system asks for dark). The two dark blocks must be
+  identical; `src/styles/tokens.test.ts` fails if they are not, or if a colour is missing from one.
+- Components never mention a theme. They read tokens, and that includes the charts: the Headline
+  findings charts are static SVG styled by class in `src/findings/chart.css`, so nothing drawn at
+  build time has a colour baked in.
+
+To add a colour token, give it a light value in `:root` and a dark value in **both** dark blocks, then
+use it as `var(--name)`. Check the pair it will be read against: text needs 4.5:1, chart text and
+essential chart marks 3:1, in both themes. A token that is not a colour (a size, a space, a font)
+goes in `:root` only.
+
+Three things turn over between the themes and are worth knowing:
+
+- **The handover band** uses the `--color-inverse` tokens, which are the reverse of the page: a black
+  band with paper type in the light theme, a paper band with ink type in the dark one. The map's
+  tooltip and the skip link use the same tokens.
+- **The map ramp** runs from `--chart-ramp-1` (the weak end) to `--chart-ramp-5` (the strong end),
+  and the strong end always marks "more": it is the darkest blue on the light page and the lightest
+  on the dark one. The legend therefore names the end of the scale by its place ("The right-hand end
+  of the scale marks the most Displacement"), never as "darker" or "lighter".
+- **`--chart-selected`**, the outline of the selected country, is ink on the light page and white on
+  the dark one.
+
 Chart colours:
 
 | Token                                    | Use                                                        |
@@ -86,7 +123,7 @@ Chart colours:
 | `--chart-grid`, `--chart-axis`, `--chart-band` | Grid lines, the zero line, shaded period bands       |
 | `--chart-text`, `--chart-text-muted`, `--chart-text-strong` | Labels, axis ticks, values              |
 | `--chart-no-data`                        | Countries the dataset does not cover                       |
-| `--chart-ramp-1` to `--chart-ramp-5`     | Map colour steps, low to high                              |
+| `--chart-ramp-1` to `--chart-ramp-5`     | Map colour steps, weak end to strong end ("more")          |
 | `--chart-bg`, `--chart-selected`         | Halo behind marks, outline of the selected country         |
 
 Fonts are self-hosted through npm packages (`@fontsource-variable/newsreader`,
