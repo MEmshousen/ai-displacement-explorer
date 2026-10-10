@@ -6,6 +6,7 @@ import EmptyFrame from './EmptyFrame.astro';
 import HandoverBand from './HandoverBand.astro';
 import SelectionDebug from './SelectionDebug.astro';
 import ViewPane from './ViewPane.astro';
+import SectorBars from '../explorer/sectors/SectorBars.astro';
 ---
 
 <section id="explorer" aria-labelledby="explorer-heading">
@@ -47,7 +48,7 @@ import ViewPane from './ViewPane.astro';
             title="Sector bars"
             subtitle="The chosen metric for the ten Sectors, ranked."
           >
-            <EmptyFrame label="Sector bars" ratio="400 / 214" />
+            <SectorBars />
           </ViewPane>
         </div>
       </div>
