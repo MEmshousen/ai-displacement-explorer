@@ -1,0 +1,152 @@
+---
+// Headline finding 3's chart: Displacement and Replacement rate by income group, high income to
+// low, as two panels of bars that share their rows. Each panel has its own scale, so the two
+// measures are never read against one axis. Static SVG, drawn at build time.
+import { scaleLinear } from 'd3-scale';
+import { findings } from '../data/findings';
+import { incomeGroupLabel, replacementRate, share } from './format';
+import './chart.css';
+
+const groups = findings.incomeGroups;
+
+const panels = [
+  {
+    title: 'Displacement',
+    unit: 'share of workforce',
+    mark: 'fc-mark-1',
+    text: 'fc-series-1',
+    values: groups.map((group) => group.displacement),
+    labels: groups.map((group) => share(group.displacement)),
+  },
+  {
+    title: 'Replacement rate',
+    unit: 'new roles per 100 displaced',
+    mark: 'fc-mark-2',
+    text: 'fc-series-2',
+    values: groups.map((group) => group.replacementRate ?? 0),
+    labels: groups.map((group) => replacementRate(group.replacementRate)),
+  },
+];
+
+// Wide: the income groups once on the left, the two panels side by side. Narrow: the panels one
+// above the other, each with its own row labels.
+const sizes = [
+  { name: 'wide', width: 640, sideBySide: true, labelWidth: 150, row: 42, bar: 22, head: 46 },
+  { name: 'narrow', width: 320, sideBySide: false, labelWidth: 130, row: 38, bar: 18, head: 42 },
+];
+const VALUE_ROOM = 50;
+const PANEL_GAP = 20;
+
+function draw(size: (typeof sizes)[number]) {
+  const { width, sideBySide, labelWidth, row, bar, head } = size;
+  const panelHeight = head + groups.length * row;
+  const panelWidth = sideBySide ? (width - labelWidth - PANEL_GAP) / 2 : width - labelWidth;
+
+  const drawn = panels.map((panel, index) => {
+    const left = labelWidth + (sideBySide ? index * (panelWidth + PANEL_GAP) : 0);
+    const top = sideBySide ? 0 : index * (panelHeight + PANEL_GAP);
+    const x = scaleLinear()
+      .domain([0, Math.max(...panel.values)])
+      .range([0, panelWidth - VALUE_ROOM]);
+    return {
+      ...panel,
+      left,
+      top,
+      // Row labels sit left of the first panel when side by side, and left of every panel otherwise.
+      labelled: !sideBySide || index === 0,
+      bars: panel.values.map((value, rowIndex) => ({
+        y: top + head + rowIndex * row + (row - bar) / 2,
+        centre: top + head + rowIndex * row + row / 2,
+        width: x(value),
+        label: panel.labels[rowIndex],
+      })),
+    };
+  });
+
+  return {
+    ...size,
+    height: sideBySide ? panelHeight : panels.length * panelHeight + PANEL_GAP,
+    panels: drawn,
+  };
+}
+
+const charts = sizes.map(draw);
+const countries = (count: number) => `${count} ${count === 1 ? 'country' : 'countries'}`;
+---
+
+<div class="fc">
+  {
+    charts.map((c) => (
+      <svg class={`fc-${c.name}`} viewBox={`0 0 ${c.width} ${c.height}`} aria-hidden="true">
+        {c.panels.map((panel) => (
+          <>
+            <text class={panel.text} x={panel.left} y={panel.top + 13}>
+              {panel.title}
+            </text>
+            <text class="fc-muted" x={panel.left} y={panel.top + 31}>
+              {panel.unit}
+            </text>
+            {panel.bars.map((bar, index) => (
+              <>
+                {panel.labelled && (
+                  <>
+                    <text x="0" y={bar.centre - 3}>
+                      {incomeGroupLabel(groups[index].incomeGroup)}
+                    </text>
+                    <text class="fc-muted" x="0" y={bar.centre + 13}>
+                      {countries(groups[index].countries)}
+                    </text>
+                  </>
+                )}
+                <rect
+                  class={`fc-bar ${panel.mark}`}
+                  x={panel.left}
+                  y={bar.y}
+                  width={bar.width}
+                  height={c.bar}
+                />
+                <text class="fc-strong" x={panel.left + bar.width + 8} y={bar.centre} dy="0.35em">
+                  {bar.label}
+                </text>
+              </>
+            ))}
+            <line
+              class="fc-axis"
+              x1={panel.left}
+              x2={panel.left}
+              y1={panel.top + c.head}
+              y2={panel.top + c.head + groups.length * c.row}
+            />
+          </>
+        ))}
+      </svg>
+    ))
+  }
+
+  <table class="visually-hidden">
+    <caption>
+      Displacement and Replacement rate by World Bank income group, average of the latest four
+      quarters, from high income to low.
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Income group</th>
+        <th scope="col">Countries</th>
+        <th scope="col">Displacement</th>
+        <th scope="col">Replacement rate, new roles per 100 displaced</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        groups.map((group) => (
+          <tr>
+            <th scope="row">{incomeGroupLabel(group.incomeGroup)}</th>
+            <td>{group.countries}</td>
+            <td>{share(group.displacement)}</td>
+            <td>{replacementRate(group.replacementRate)}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

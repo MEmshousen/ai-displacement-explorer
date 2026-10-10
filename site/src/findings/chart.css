@@ -1,0 +1,113 @@
+/* Shared styles for the four Headline findings charts. Every chart is drawn twice, a wide SVG for a
+   column of about 640px and a narrow one for about 300px, and the column's own width picks one, so
+   text stays near 13px on screen at both. All colours and fonts come from the tokens. */
+
+.fc {
+  container-type: inline-size;
+}
+/* Beats the chapter's rule that makes every SVG in a chart area a block. */
+.fc > svg.fc-wide {
+  display: none;
+}
+@container (min-width: 480px) {
+  .fc > svg.fc-wide {
+    display: block;
+  }
+  .fc > svg.fc-narrow {
+    display: none;
+  }
+}
+
+.fc text {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  fill: var(--chart-text);
+}
+.fc-wide text {
+  font-size: 13.5px;
+}
+.fc-narrow text {
+  font-size: 12.5px;
+}
+.fc text.fc-muted {
+  fill: var(--chart-text-muted);
+}
+.fc text.fc-strong {
+  font-weight: 600;
+  fill: var(--chart-text-strong);
+}
+.fc text.fc-series-1 {
+  font-weight: 600;
+  fill: var(--chart-series-1-text);
+}
+.fc text.fc-series-2 {
+  font-weight: 600;
+  fill: var(--chart-series-2-text);
+}
+/* A halo so a label stays readable over a line or a band. */
+.fc text.fc-halo {
+  paint-order: stroke;
+  stroke: var(--chart-bg);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.fc text.fc-on-band {
+  stroke: var(--chart-band);
+}
+
+.fc-grid {
+  stroke: var(--chart-grid);
+  stroke-width: 1;
+}
+.fc-axis {
+  stroke: var(--chart-axis);
+  stroke-width: 1;
+}
+.fc-band {
+  fill: var(--chart-band);
+}
+
+.fc-bar {
+  fill: var(--chart-neutral);
+}
+.fc-bar.fc-mark-1 {
+  fill: var(--chart-series-1);
+}
+.fc-bar.fc-mark-2 {
+  fill: var(--chart-series-2);
+}
+
+.fc-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke: var(--chart-neutral-strong);
+}
+.fc-line.fc-mark-1 {
+  stroke: var(--chart-series-1);
+}
+.fc-line.fc-mark-2 {
+  stroke: var(--chart-series-2);
+}
+
+/* Dots: filled for one measure, hollow for the other, so the pair never relies on colour. */
+.fc-dot {
+  fill: var(--chart-neutral-strong);
+  stroke: var(--chart-bg);
+  stroke-width: 1.5;
+}
+.fc-dot.fc-mark-1 {
+  fill: var(--chart-series-1);
+}
+.fc-dot.fc-mark-2 {
+  fill: var(--chart-series-2);
+}
+.fc-dot-hollow {
+  fill: var(--chart-bg);
+  stroke: var(--chart-neutral-strong);
+  stroke-width: 2;
+}
+.fc-dot-hollow.fc-mark-1 {
+  stroke: var(--chart-series-1);
+}
