@@ -1,0 +1,28 @@
+---
+const repo = 'https://github.com/MEmshousen/ai-displacement-explorer';
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <p>
+      <strong>About the data.</strong> Synthetic data: simulated figures calibrated to published research,
+      not measured observations. Method, sources and code <a href={repo}>on GitHub</a>. Built by
+      Madison Emshousen.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: var(--space-6) var(--space-7);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+  p {
+    max-width: 75ch;
+  }
+  strong {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+</style>

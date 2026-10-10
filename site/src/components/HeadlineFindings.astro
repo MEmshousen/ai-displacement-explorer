@@ -1,10 +1,74 @@
 ---
+// The four Headline findings, one chapter each. A chart ticket fills a chapter by adding
+// <TheChart slot="chart" /> inside it; see site/README.md.
+import Chapter from './Chapter.astro';
 ---
 
-<section id="headline-findings" aria-labelledby="headline-findings-heading">
-  <h2 id="headline-findings-heading">Headline findings</h2>
-  <p class="placeholder">
-    Placeholder: four Headline findings will go here, each a single conclusion drawn from the data
-    with its supporting chart.
-  </p>
-</section>
+<div class="wrap">
+  <Chapter
+    number={1}
+    title="Displacement tripled"
+    chartTitle="Displacement rose every year; Net change moved further below zero"
+    chartSubtitle="Share of workforce, quarterly average across 80 countries"
+    chartRatio="500 / 285"
+    chartPlaceholder="Line chart: Displacement and Net change by quarter"
+  >
+    <p>
+      Across 80 countries, average Displacement rose from 2.7% in 2020 to 8.7% in the latest four
+      quarters.
+    </p>
+    <p>New roles did not keep pace: Net change fell from −0.9% to −3.3%.</p>
+    <p slot="definition">
+      <b>Displacement</b> is the gross share of a Sector's workforce whose roles were lost to AI in a
+      quarter. <b>Net change</b> offsets it with the new roles AI created; negative means more lost than
+      created.
+    </p>
+    <Fragment slot="source">Shaded bands mark the two periods compared.</Fragment>
+  </Chapter>
+
+  <Chapter
+    number={2}
+    title="The Sector gap"
+    chartTitle="Displacement by Sector"
+    chartSubtitle="Share of workforce, average of the latest four quarters"
+    chartRatio="500 / 284"
+    chartPlaceholder="Ranked bars: Displacement by Sector"
+  >
+    <p>Administrative & Clerical has the highest Displacement of the ten Sectors, at 14.2%.</p>
+    <p>
+      Healthcare & Life Sciences (3.3%) and Education & Research (3.9%) sit at the other end, at less
+      than a third of that.
+    </p>
+  </Chapter>
+
+  <Chapter
+    number={3}
+    title="Rich countries lose more but recover more"
+    chartTitle="Displacement and Replacement rate both rise with income"
+    chartSubtitle="By World Bank income group, average of the latest four quarters"
+    chartRatio="500 / 174"
+    chartPlaceholder="Paired bars: Displacement and Replacement rate by income group"
+  >
+    <p>
+      High-income countries show the highest Displacement, 13.1%, against 4.7% in low-income countries.
+    </p>
+    <p>
+      They also show the highest Replacement rate: 75 new roles for every 100 displaced, against 20.
+    </p>
+    <p slot="definition">
+      <b>Replacement rate</b> is the number of new roles AI created for every 100 roles displaced.
+    </p>
+  </Chapter>
+
+  <Chapter
+    number={4}
+    title="Women in clerical work"
+    chartTitle="One Sector stands apart"
+    chartSubtitle="Women's share of the workforce and of displaced roles, by Sector"
+    chartRatio="500 / 272"
+    chartPlaceholder="Dot pairs: women's share of workforce and of displaced roles"
+  >
+    <p>Women are 79% of the Administrative & Clerical workforce but 95% of its displaced roles.</p>
+    <p>In every other Sector the two shares are within about 4 points of each other.</p>
+  </Chapter>
+</div>
