@@ -1,0 +1,269 @@
+---
+// The Selection written as a sentence: the Explorer's only control. Each underlined word is a
+// native <select> laid invisibly over its own text, so the pickers are the browser's own and work
+// by keyboard, screen reader and touch. After the sentence come the pinned countries, which are
+// hidden on a phone.
+//
+// The page is built showing the default Selection with the pickers switched off; the script
+// switches them on once the Explorer data has loaded (see control.ts).
+import { findings } from '../../data/findings';
+import { defaultSelection, MAX_PINNED, METRICS } from '../../selection';
+import { ALL_SECTORS, metricWord, NO_COUNTRY, NONE, pinning, quartersByYear, sentence } from './wording';
+
+const { choices } = findings;
+const initial = defaultSelection(choices);
+const { words, gaps } = sentence(initial);
+---
+
+<div class="selection-sentence" data-selection-sentence>
+  <h3 class="visually-hidden" id="explorer-sentence-title">Selection</h3>
+
+  <p class="line" role="group" aria-labelledby="explorer-sentence-title">
+    <span data-gap>{gaps[0]}</span><span class="word"
+      ><span class="text" aria-hidden="true" data-word="metric">{words.metric}</span><select
+        aria-label="Metric"
+        data-field="metric"
+        disabled
+      >
+        {METRICS.map(({ id }) => <option value={id} selected={id === initial.metric}>{metricWord(id)}</option>)}
+      </select></span
+    ><span data-gap>{gaps[1]}</span><span class="word"
+      ><span class="text" aria-hidden="true" data-word="sector">{words.sector}</span><select
+        aria-label="Sector"
+        data-field="sector"
+        disabled
+      >
+        <option value={NONE}>{ALL_SECTORS}</option>
+        {choices.sectors.map((sector) => <option value={sector}>{sector}</option>)}
+      </select></span
+    ><span data-gap>{gaps[2]}</span><span class="word"
+      ><span class="text" aria-hidden="true" data-word="quarter">{words.quarter}</span><select
+        aria-label="Quarter"
+        data-field="quarter"
+        disabled
+      >
+        {
+          quartersByYear(choices.quarters).map((year) => (
+            <optgroup label={year.label}>
+              {year.choices.map(({ value, label }) => (
+                <option value={value} selected={value === initial.quarter}>
+                  {label}
+                </option>
+              ))}
+            </optgroup>
+          ))
+        }
+      </select></span
+    ><span data-gap>{gaps[3]}</span><span class="word"
+      ><span class="text" aria-hidden="true" data-word="country">{words.country}</span><select
+        aria-label="Selected country"
+        data-field="country"
+        disabled
+      >
+        <option value={NONE}>{NO_COUNTRY}</option>
+      </select></span
+    ><span data-gap>{gaps[4]}</span>
+  </p>
+
+  <div class="pins" role="group" aria-labelledby="explorer-pins-title">
+    <p class="pins-title">
+      <span class="caps" id="explorer-pins-title">Pinned on the trend chart</span>
+      <span class="count" data-pin-count>{pinning(initial).count}</span>
+    </p>
+    <ul data-pin-list aria-label="Pinned countries" hidden></ul>
+    <button type="button" data-pin-selected hidden></button>
+    <select aria-label={`Pin a country, up to ${MAX_PINNED}`} data-pin-add disabled>
+      <option value={NONE}>Pin a country…</option>
+    </select>
+    <p class="full" data-pin-full hidden>That is the limit. Remove one to pin another.</p>
+    <p class="visually-hidden" role="status" data-pin-status></p>
+  </div>
+
+  <p class="error" data-sentence-error hidden>
+    The Explorer data could not be loaded, so the Selection cannot be changed. Reload the page to try again.
+  </p>
+</div>
+
+<style>
+  .line {
+    color: var(--color-ink);
+  }
+
+  /* A clickable word: its text, a small arrow, and the picker stretched invisibly over both. */
+  .word {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    color: var(--color-accent);
+  }
+  .word .text {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+    text-decoration-skip-ink: none;
+  }
+  .word::after {
+    content: '\00a0\25BE';
+    font-size: 0.6em;
+    vertical-align: middle;
+  }
+  .word select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    /* The inherited size keeps a phone from zooming in when the picker opens. */
+    font: inherit;
+    cursor: pointer;
+  }
+  .word select:disabled {
+    cursor: default;
+  }
+  .word:hover:has(select:enabled) {
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+  .word:has(select:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  /* The pinned countries: small sans type on one wrapping row under the sentence. */
+  .pins {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    margin-top: var(--space-3);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.3;
+    color: var(--color-muted);
+  }
+  .pins [hidden] {
+    display: none;
+  }
+  .pins-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+  .pins-title .caps {
+    color: var(--color-ink);
+  }
+  .count::before {
+    content: '\00b7\00a0';
+  }
+
+  .pins ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* The pins are added by the script, so they carry no scoped-style attribute. */
+  .pins ul :global(li) {
+    display: flex;
+    align-items: center;
+    padding-left: var(--space-3);
+    border: 1px solid var(--color-ink);
+    background: var(--color-page);
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+  .pins ul :global(button) {
+    min-width: 2rem;
+    min-height: 2rem;
+    margin-left: var(--space-1);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-muted);
+    font: inherit;
+    font-size: 1.15rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .pins ul :global(button:hover) {
+    background: var(--color-ink);
+    color: var(--color-on-inverse);
+  }
+  .pins ul :global(button:focus-visible) {
+    outline-offset: 0;
+  }
+
+  .pins > button,
+  .pins > select {
+    min-height: 2rem;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-accent);
+    border-radius: 0;
+    background: var(--color-page);
+    color: var(--color-accent);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .pins > button::before {
+    content: '+\00a0';
+  }
+  .pins > button:hover,
+  .pins > select:hover:enabled {
+    background: var(--color-surface);
+  }
+  .pins > select:disabled {
+    border-color: var(--color-rule);
+    color: var(--color-faint);
+    cursor: default;
+  }
+  .full {
+    color: var(--color-ink);
+  }
+
+  .error {
+    margin-top: var(--space-3);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: var(--color-ink);
+  }
+
+  /* Touch widths, and any touch screen: 44px targets. */
+  @media (max-width: 979px), (pointer: coarse) {
+    .pins ul :global(button) {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+    }
+    .pins > button,
+    .pins > select {
+      min-height: 2.75rem;
+    }
+  }
+
+  /* Phone: the sentence alone is the control. The trend chart leaves the pinned countries out at
+     the same width (PHONE_QUERY in ../page.ts). */
+  @media (max-width: 639px) {
+    .pins {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { explorerPage } from '../page';
+  import { mountSentence } from './control';
+
+  const root = document.querySelector<HTMLElement>('[data-selection-sentence]');
+  if (root) {
+    try {
+      const { explorer, store } = await explorerPage();
+      mountSentence(root, explorer, store);
+    } catch {
+      root.querySelector<HTMLElement>('[data-sentence-error]')!.hidden = false;
+    }
+  }
+</script>

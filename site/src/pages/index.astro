@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeadline from '../components/PageHeadline.astro';
+import SyntheticNote from '../components/SyntheticNote.astro';
+import SummaryStrip from '../components/SummaryStrip.astro';
+import HeadlineFindings from '../components/HeadlineFindings.astro';
+import Explorer from '../components/Explorer.astro';
+
+const title = 'AI Displacement Explorer';
+const description =
+  'How AI adoption is reshaping workforces across 80 countries and ten Sectors from 2020 to 2026: Displacement, Net change and Replacement rate, shown with Synthetic data calibrated to published research.';
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="lede wrap">
+    <PageHeadline />
+    <SyntheticNote />
+    <SummaryStrip />
+  </div>
+  <HeadlineFindings />
+  <Explorer />
+</BaseLayout>
+
+<style>
+  .lede {
+    padding-block: clamp(2.5rem, 7vw, 5rem) var(--space-6);
+  }
+</style>

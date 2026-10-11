@@ -1,0 +1,103 @@
+---
+// The masthead: the site's name, the credit, and the theme controls. The controls are switched on
+// by the script, so a page without scripts shows no button that does nothing.
+---
+
+<header class="masthead">
+  <div class="wrap caps">
+    <span class="name">AI Displacement Explorer</span>
+    <span class="credit">A portfolio project by Madison Emshousen</span>
+    <span class="theme">
+      <button type="button" data-theme-system aria-label="Follow the system theme" hidden>System</button>
+      <button type="button" data-theme-toggle hidden></button>
+    </span>
+  </div>
+</header>
+
+<script>
+  import { mountThemeToggle } from '../theme/theme';
+
+  const toggle = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const system = document.querySelector<HTMLButtonElement>('[data-theme-system]');
+  if (toggle && system) mountThemeToggle(toggle, system);
+</script>
+
+<style>
+  .masthead {
+    border-top: var(--rule-heavy) solid var(--color-ink);
+    border-bottom: 1px solid var(--color-ink);
+  }
+  .wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    /* The height with the buttons in it, held while the script has yet to show them. */
+    min-height: calc(2rem + 0.7rem);
+    padding-block: 0.35rem;
+  }
+  .name {
+    font-weight: 500;
+  }
+  .credit {
+    margin-left: auto;
+    color: var(--color-faint);
+  }
+  .theme {
+    display: flex;
+    gap: var(--space-2);
+  }
+  button {
+    min-height: 2rem;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-ink);
+    border-radius: 0;
+    background: none;
+    color: var(--color-ink);
+    font: inherit;
+    font-weight: 500;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+  }
+  button:focus-visible {
+    /* Tight, so the ring stays inside the masthead's rules. */
+    outline-offset: 1px;
+  }
+  /* Not on a touch screen, where the hover would stick to the button after a tap. */
+  @media (hover: hover) {
+    button:hover {
+      background: var(--color-ink);
+      color: var(--color-page);
+    }
+  }
+  /* Going back to the system setting is the quieter of the two. */
+  [data-theme-system] {
+    border-color: transparent;
+    color: var(--color-faint);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  /* The byline under the headline already names the author on a phone. */
+  @media (max-width: 720px) {
+    .credit {
+      display: none;
+    }
+    .theme {
+      margin-left: auto;
+    }
+  }
+  /* Touch widths, and any touch screen: 44px targets. */
+  @media (max-width: 979px), (pointer: coarse) {
+    .wrap {
+      min-height: calc(2.75rem + 0.4rem);
+      padding-block: 0.2rem;
+      gap: var(--space-2);
+    }
+    button {
+      min-height: 2.75rem;
+    }
+    .theme {
+      gap: var(--space-1);
+    }
+  }
+</style>

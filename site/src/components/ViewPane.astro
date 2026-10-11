@@ -1,0 +1,65 @@
+---
+// One pane of the Explorer panel: a title, a subtitle, the view itself, and the source line.
+//
+// The title and subtitle depend on the Selection, so a view rewrites them from its script through
+// the [data-view-title] and [data-view-subtitle] hooks; the props are what shows before it runs.
+//
+// Slots
+//   (default)   the view (map, trend chart or Sector bars)
+//   controls    optional controls under the view, above the source line (the map's quarter slider)
+import SourceLine from './SourceLine.astro';
+
+interface Props {
+  /** Which region this is: "map", "trend" or "sectors". Becomes the id "explorer-map" and so on. */
+  region: 'map' | 'trend' | 'sectors';
+  title: string;
+  subtitle: string;
+}
+
+const { region, title, subtitle } = Astro.props;
+const id = `explorer-${region}`;
+---
+
+<section class="pane" id={id} data-region={region} aria-labelledby={`${id}-title`}>
+  <h3 id={`${id}-title`} data-view-title>{title}</h3>
+  <p class="subtitle" data-view-subtitle>{subtitle}</p>
+  <div class="view" data-view><slot /></div>
+  {
+    Astro.slots.has('controls') && (
+      <div class="controls" data-view-controls>
+        <slot name="controls" />
+      </div>
+    )
+  }
+  <SourceLine />
+</section>
+
+<style>
+  .pane {
+    min-width: 0;
+    padding: var(--space-4) 1.1rem;
+    border: 1px solid var(--color-rule);
+    background: var(--color-page);
+  }
+  h3 {
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.3;
+  }
+  .subtitle {
+    margin-bottom: var(--space-3);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: var(--color-faint);
+  }
+  .view :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .controls {
+    margin-top: var(--space-3);
+  }
+</style>

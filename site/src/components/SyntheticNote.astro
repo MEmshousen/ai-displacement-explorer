@@ -1,0 +1,39 @@
+---
+// The one boxed Synthetic data label, placed directly under the headline.
+---
+
+<div class="note" role="note" aria-labelledby="synthetic-note-label">
+  <span class="caps" id="synthetic-note-label">Synthetic data</span>
+  <p>
+    <strong>Every number on this page is simulated.</strong> The figures are calibrated to published
+    research but none is a measured observation. Each finding compares the 2020 average with the latest
+    four quarters (2025 Q3 to 2026 Q2), as a simple average across 80 countries.
+  </p>
+</div>
+
+<style>
+  .note {
+    display: grid;
+    gap: var(--space-1) var(--space-5);
+    margin-top: var(--space-6);
+    padding: var(--space-4) 1.2rem;
+    border: 1.5px solid var(--color-ink);
+    background: var(--color-surface);
+  }
+  .caps {
+    color: var(--color-accent);
+  }
+  p {
+    max-width: 75ch;
+    font-size: 0.98rem;
+  }
+  strong {
+    font-weight: 600;
+  }
+  @media (min-width: 900px) {
+    .note {
+      grid-template-columns: auto 1fr;
+      align-items: baseline;
+    }
+  }
+</style>

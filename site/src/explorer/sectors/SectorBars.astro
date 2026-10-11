@@ -1,0 +1,218 @@
+---
+// The Sector bars: the ten Sectors ranked by the Selection's metric for its quarter, in the selected
+// country or, with none, as the global average. Goes in the "sectors" <ViewPane>, whose title and
+// subtitle it rewrites.
+//
+// The bars are an ordered list of buttons, so the chart is its own text alternative: each button
+// reads as a Sector's name and value, and says whether it is the chosen Sector. The rows are made
+// by `view.ts` once the Explorer data has loaded; until then this holds the space they will take.
+---
+
+<div class="sector-bars" data-sector-bars>
+  <ol class="list" role="list" data-sector-list>
+    <li class="status" data-sector-status>Loading the Sector bars.</li>
+  </ol>
+  <p class="hint" data-sector-hint></p>
+</div>
+
+<script>
+  import { explorerPage } from '../page';
+  import { mountSectorBars } from './view';
+
+  const root = document.querySelector<HTMLElement>('[data-sector-bars]');
+  if (root) {
+    explorerPage()
+      .then((page) => mountSectorBars(root, page))
+      .catch((error: unknown) => {
+        console.error(error);
+        const status = root.querySelector('[data-sector-status]');
+        if (status) status.textContent = 'The Sector bars could not be loaded. Reload the page to try again.';
+      });
+  }
+</script>
+
+<style>
+  .sector-bars {
+    container-type: inline-size;
+    /* The height of one row, and of the bar inside it. Narrow: the name and value over the bar. */
+    --pitch: 2.5rem;
+    --bar-height: 0.5rem;
+    --gap: var(--space-2);
+    font-size: var(--text-xs);
+    line-height: 1.25;
+    color: var(--chart-text);
+  }
+
+  .list {
+    position: relative;
+    height: calc(var(--count, 10) * var(--pitch));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .status {
+    color: var(--chart-text-muted);
+  }
+  .hint {
+    min-height: 1.25em;
+    margin-top: var(--space-2);
+    color: var(--chart-text-muted);
+  }
+
+  /* Each row is placed by its rank, so re-ranking slides rows past each other. */
+  .list :global(li:not(.status)) {
+    position: absolute;
+    inset: 0 0 auto;
+    height: var(--pitch);
+    transform: translateY(calc(var(--rank, 0) * var(--pitch)));
+  }
+  .list :global(li:focus-within) {
+    z-index: 1;
+  }
+
+  .list :global(button) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'name value'
+      'track track';
+    align-content: center;
+    gap: 0.3rem var(--gap);
+    width: 100%;
+    height: calc(100% - 4px);
+    margin: 2px 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .list :global(button:focus-visible) {
+    outline-offset: 2px;
+  }
+
+  .list :global(.name) {
+    grid-area: name;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .list :global(.value) {
+    grid-area: value;
+    color: var(--chart-text-strong);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .list :global(.no-value .value) {
+    color: var(--chart-text-muted);
+  }
+
+  .list :global(.track) {
+    grid-area: track;
+    position: relative;
+    height: var(--bar-height);
+  }
+  /* The bar is the whole track, moved and squeezed into place: cheap to animate. */
+  .list :global(.bar) {
+    position: absolute;
+    inset: 0;
+    background: var(--chart-series-1);
+    transform-origin: 0 50%;
+    transform: translateX(var(--start, 0%)) scaleX(var(--length, 0));
+  }
+  .list :global(.zero) {
+    position: absolute;
+    inset: -3px auto -3px calc(var(--zero, 0) * 100%);
+    width: 1px;
+    margin-left: -0.5px;
+    background: var(--chart-axis);
+  }
+
+  /* With a Sector chosen, its bar keeps the blue and its text goes bold; the rest step back. */
+  .list.has-chosen :global(.bar) {
+    background: var(--chart-neutral);
+  }
+  .list.has-chosen :global(.name) {
+    color: var(--chart-text-muted);
+  }
+  .list :global([aria-pressed='true'] .bar) {
+    background: var(--chart-series-1);
+  }
+  .list :global([aria-pressed='true'] .name),
+  .list :global([aria-pressed='true'] .value) {
+    color: var(--chart-text-strong);
+    font-weight: 600;
+  }
+  .list :global(button:hover .name) {
+    color: var(--chart-text-strong);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Wide enough: the name, the bar and the value on one line. */
+  @container (min-width: 350px) {
+    .list {
+      --pitch: 1.5rem;
+      --bar-height: 0.8rem;
+      --name-width: 10.6rem;
+      --value-width: 3.75rem;
+      --before-track: calc(var(--name-width) + var(--gap));
+      --track-width: calc(100% - var(--before-track) - var(--gap) - var(--value-width));
+    }
+    .list :global(button) {
+      grid-template-columns: var(--name-width) minmax(0, 1fr) var(--value-width);
+      grid-template-areas: 'name track value';
+      align-items: center;
+    }
+    .list :global(.name) {
+      text-align: right;
+    }
+    /* One zero line down the whole list, so it holds still while rows slide past each other. */
+    .list:not(:has(.status))::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 calc(var(--before-track) + var(--track-width) * var(--zero, 0));
+      width: 1px;
+      margin-left: -0.5px;
+      background: var(--chart-axis);
+    }
+    .list :global(.zero) {
+      display: none;
+    }
+  }
+
+  /* Touch widths, and any touch screen: each row is a 44px target, in either layout. */
+  @media (max-width: 979px), (pointer: coarse) {
+    .sector-bars {
+      --pitch: 2.75rem;
+    }
+    .list :global(button) {
+      height: 100%;
+      margin: 0;
+    }
+    @container (min-width: 350px) {
+      .list {
+        --pitch: 2.75rem;
+        --bar-height: 1rem;
+      }
+    }
+  }
+
+  .sector-bars.is-drawn :global(li) {
+    transition: transform 320ms ease;
+  }
+  .sector-bars.is-drawn :global(.bar) {
+    transition:
+      transform 240ms ease-out,
+      background-color 160ms ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sector-bars.is-drawn :global(li),
+    .sector-bars.is-drawn :global(.bar) {
+      transition: none;
+    }
+  }
+</style>

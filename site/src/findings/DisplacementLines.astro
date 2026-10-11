@@ -1,0 +1,204 @@
+---
+// Headline finding 1's chart: Displacement and Net change by quarter, with the two periods the
+// finding compares shaded and their averages labelled. Static SVG, drawn at build time.
+import { scaleLinear, scalePoint } from 'd3-scale';
+import { line } from 'd3-shape';
+import { findings } from '../data/findings';
+import { quarterLabel } from '../selection';
+import { netChange, share, wholeShare } from './format';
+import './chart.css';
+
+const { trend, periods, headline } = findings;
+const { quarters } = trend;
+
+const sizes = [
+  { name: 'wide', width: 640, height: 360, top: 28, right: 14, bottom: 30, left: 44 },
+  { name: 'narrow', width: 320, height: 300, top: 26, right: 8, bottom: 28, left: 38 },
+];
+
+const values = [...trend.displacement, ...trend.netChange];
+
+function draw(size: (typeof sizes)[number]) {
+  const { width, height, top, right, bottom, left } = size;
+  const x = scalePoint<string>()
+    .domain(quarters)
+    .range([left, width - right])
+    .padding(0.5);
+  const y = scaleLinear()
+    .domain([Math.min(...values), Math.max(...values)])
+    .nice(6)
+    .range([height - bottom, top]);
+  const at = (quarter: string) => x(quarter) ?? 0;
+  const path = (series: readonly number[]) =>
+    line<number>()
+      .x((_, index) => at(quarters[index]))
+      .y((value) => y(value))(series) ?? '';
+
+  // A shaded band over a period, with that period's two averages written beside the lines: outside
+  // them for the first period, where the lines are close to zero, and between them for the last.
+  const band = (period: readonly string[], key: 'baseline' | 'latest') => {
+    const outside = key === 'baseline';
+    const x0 = at(period[0]) - x.step() / 2;
+    const x1 = at(period[period.length - 1]) + x.step() / 2;
+    const inPeriod = (series: readonly number[]) =>
+      series.filter((_, index) => period.includes(quarters[index]));
+    return {
+      x0,
+      x1,
+      centre: (x0 + x1) / 2,
+      displacement: {
+        text: share(headline.displacement[key]),
+        y: outside
+          ? y(Math.max(...inPeriod(trend.displacement))) - 10
+          : y(Math.min(...inPeriod(trend.displacement))) + 22,
+      },
+      netChange: {
+        text: netChange(headline.netChange[key]),
+        y: outside
+          ? y(Math.min(...inPeriod(trend.netChange))) + 20
+          : y(Math.max(...inPeriod(trend.netChange))) - 12,
+      },
+    };
+  };
+
+  const middle = Math.floor(quarters.length / 2);
+  const last = quarters.length - 1;
+
+  return {
+    ...size,
+    plotTop: top,
+    plotBottom: height - bottom,
+    ticks: y.ticks(6).map((tick) => ({ y: y(tick), label: wholeShare(tick), zero: tick === 0 })),
+    years: quarters
+      .filter((quarter) => quarter.endsWith('Q1'))
+      .map((quarter) => ({ x: at(quarter), label: quarter.slice(0, 4) })),
+    baseline: band(periods.baseline, 'baseline'),
+    latest: band(periods.latest, 'latest'),
+    displacementPath: path(trend.displacement),
+    netChangePath: path(trend.netChange),
+    labelX: at(quarters[middle]),
+    displacementLabelY: y(trend.displacement[middle]) - 12,
+    netChangeLabelY: y(trend.netChange[middle]) + 22,
+    endX: at(quarters[last]),
+    displacementEndY: y(trend.displacement[last]),
+    netChangeEndY: y(trend.netChange[last]),
+  };
+}
+
+const charts = sizes.map(draw);
+const baselineYear = periods.baseline[0].slice(0, 4);
+const caption =
+  'Displacement and Net change by quarter, as a share of the workforce. ' +
+  `The ${baselineYear} averages are ${share(headline.displacement.baseline)} and ` +
+  `${netChange(headline.netChange.baseline)}; the averages of the latest four quarters are ` +
+  `${share(headline.displacement.latest)} and ${netChange(headline.netChange.latest)}.`;
+---
+
+<div class="fc">
+  {
+    charts.map((c) => (
+      <svg class={`fc-${c.name}`} viewBox={`0 0 ${c.width} ${c.height}`} aria-hidden="true">
+        <rect
+          class="fc-band"
+          x={c.baseline.x0}
+          y={c.plotTop}
+          width={c.baseline.x1 - c.baseline.x0}
+          height={c.plotBottom - c.plotTop}
+        />
+        <rect
+          class="fc-band"
+          x={c.latest.x0}
+          y={c.plotTop}
+          width={c.latest.x1 - c.latest.x0}
+          height={c.plotBottom - c.plotTop}
+        />
+        <text class="fc-muted" x={c.baseline.x0} y={c.plotTop - 9}>
+          {baselineYear} average
+        </text>
+        <text class="fc-muted" x={c.latest.x1} y={c.plotTop - 9} text-anchor="end">
+          Latest four quarters, average
+        </text>
+
+        {c.ticks.map((tick) => (
+          <>
+            <line
+              class={tick.zero ? 'fc-axis' : 'fc-grid'}
+              x1={c.left}
+              x2={c.width - c.right}
+              y1={tick.y}
+              y2={tick.y}
+            />
+            <text class="fc-muted" x={c.left - 8} y={tick.y} dy="0.35em" text-anchor="end">
+              {tick.label}
+            </text>
+          </>
+        ))}
+        {c.years.map((year) => (
+          <text class="fc-muted" x={year.x} y={c.height - 8} text-anchor="middle">
+            {year.label}
+          </text>
+        ))}
+
+        <path class="fc-line fc-mark-1" d={c.displacementPath} />
+        <path class="fc-line fc-mark-2" d={c.netChangePath} />
+        <circle class="fc-dot fc-mark-1" cx={c.endX} cy={c.displacementEndY} r="4" />
+        <circle class="fc-dot fc-mark-2" cx={c.endX} cy={c.netChangeEndY} r="4" />
+
+        <text
+          class="fc-series-1 fc-halo"
+          x={c.labelX}
+          y={c.displacementLabelY}
+          text-anchor="end"
+        >
+          Displacement
+        </text>
+        <text class="fc-series-2 fc-halo" x={c.labelX} y={c.netChangeLabelY} text-anchor="end">
+          Net change
+        </text>
+
+        {[c.baseline, c.latest].map((period) => (
+          <>
+            <text
+              class="fc-strong fc-halo fc-on-band"
+              x={period.centre}
+              y={period.displacement.y}
+              text-anchor="middle"
+            >
+              {period.displacement.text}
+            </text>
+            <text
+              class="fc-strong fc-halo fc-on-band"
+              x={period.centre}
+              y={period.netChange.y}
+              text-anchor="middle"
+            >
+              {period.netChange.text}
+            </text>
+          </>
+        ))}
+      </svg>
+    ))
+  }
+
+  <table class="visually-hidden">
+    <caption>{caption}</caption>
+    <thead>
+      <tr>
+        <th scope="col">Quarter</th>
+        <th scope="col">Displacement</th>
+        <th scope="col">Net change</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        quarters.map((quarter, index) => (
+          <tr>
+            <th scope="row">{quarterLabel(quarter)}</th>
+            <td>{share(trend.displacement[index])}</td>
+            <td>{netChange(trend.netChange[index])}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

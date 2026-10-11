@@ -1,0 +1,41 @@
+---
+// The full-width band, set in reverse (black in the light theme, paper in the dark one), that hands the reader over from the Headline findings to the Explorer.
+// It carries the Explorer's heading; Explorer.astro points its aria-labelledby at `headingId`.
+interface Props {
+  headingId: string;
+}
+
+const { headingId } = Astro.props;
+---
+
+<div class="band">
+  <div class="wrap">
+    <p class="caps">The Explorer</p>
+    <h2 id={headingId}>Now check it yourself.</h2>
+    <p class="text">
+      The same Synthetic data, unedited. Change the Selection in the sentence below, drag through the
+      quarters, and click any country.
+    </p>
+  </div>
+</div>
+
+<style>
+  .band {
+    padding-block: clamp(2.5rem, 6vw, 4rem);
+    background: var(--color-inverse);
+    color: var(--color-on-inverse);
+  }
+  .caps {
+    color: var(--color-on-inverse-accent);
+  }
+  h2 {
+    margin: 0.6rem 0 0.8rem;
+    font-size: var(--text-band);
+  }
+  .text {
+    max-width: 48ch;
+    font-family: var(--font-serif);
+    font-size: var(--text-prose);
+    color: var(--color-on-inverse-muted);
+  }
+</style>

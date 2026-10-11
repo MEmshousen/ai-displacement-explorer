@@ -1,0 +1,131 @@
+---
+// The four Headline findings, one chapter each, with their charts. Every number in the text comes
+// from the findings data; the wording around the numbers is fixed and checked against the data.
+import Chapter from './Chapter.astro';
+import { findings } from '../data/findings';
+import { applyPatch, defaultSelection, serialiseSelection, type SelectionPatch } from '../selection';
+import { CLERICAL_SECTOR, findingFacts, WOMEN_FINDING_LINK, wordingProblems } from '../findings/facts';
+import { netChange, replacementRate, share, wholeShare } from '../findings/format';
+import DisplacementLines from '../findings/DisplacementLines.astro';
+import SectorGapBars from '../findings/SectorGapBars.astro';
+import IncomeGroupBars from '../findings/IncomeGroupBars.astro';
+import WomenShareDots from '../findings/WomenShareDots.astro';
+
+const problems = wordingProblems(findings);
+if (problems.length > 0) {
+  throw new Error(
+    `The Headline findings' wording no longer matches the data: ${problems.join(', ')}. ` +
+      'Reword the finding in HeadlineFindings.astro and SummaryStrip.astro.',
+  );
+}
+
+const { headline, choices, incomeGroups } = findings;
+const facts = findingFacts(findings);
+const countryCount = choices.countries.length;
+const otherGroupCounts = incomeGroups.slice(0, -1).map((group) => group.countries);
+
+// The sentences that carry numbers are written here as whole strings, so that no space next to a
+// number depends on how the template's line breaks are read.
+const text = {
+  displacement:
+    `Across ${countryCount} countries, average Displacement rose from ` +
+    `${share(headline.displacement.baseline)} in 2020 to ${share(headline.displacement.latest)} ` +
+    'in the latest four quarters.',
+  netChange:
+    'New roles did not keep pace: Net change fell from ' +
+    `${netChange(headline.netChange.baseline)} to ${netChange(headline.netChange.latest)}.`,
+  topSector:
+    `${facts.topSector.sector} has the highest Displacement of the ten Sectors, at ` +
+    `${share(facts.topSector.displacement)}.`,
+  lowSectors:
+    `${facts.lowestSector.sector} (${share(facts.lowestSector.displacement)}) and ` +
+    `${facts.secondLowestSector.sector} (${share(facts.secondLowestSector.displacement)}) ` +
+    'sit at the other end, at less than a third of that.',
+  incomeDisplacement:
+    'High-income countries show the highest Displacement, ' +
+    `${share(facts.highIncome.displacement)}, against ${share(facts.lowIncome.displacement)} ` +
+    'in low-income countries.',
+  incomeReplacement:
+    'They also show the highest Replacement rate: ' +
+    `${replacementRate(facts.highIncome.replacementRate)} new roles for every 100 displaced, ` +
+    `against ${replacementRate(facts.lowIncome.replacementRate)}.`,
+  incomeSource:
+    'Replacement rate is rounded to the nearest whole number. The low-income group is only ' +
+    `${facts.lowIncome.countries} countries, against ${otherGroupCounts.slice(0, -1).join(', ')} ` +
+    `and ${otherGroupCounts.at(-1)} in the others.`,
+  women:
+    `Women are ${wholeShare(facts.clerical.workforce)} of the ${CLERICAL_SECTOR} workforce but ` +
+    `${wholeShare(facts.clerical.displaced)} of its displaced roles.`,
+  otherSectors:
+    'In every other Sector the two shares are within about ' +
+    `${facts.widestOtherGap} points of each other.`,
+  womenSource: `Averages across all ${choices.quarters.length} quarters. Gaps are in percentage points.`,
+};
+
+/** The query string of the Selection a chapter's "See this in the Explorer" link opens. */
+const explorerQuery = (patch: SelectionPatch) =>
+  serialiseSelection(applyPatch(defaultSelection(choices), patch, choices), choices);
+---
+
+<div class="wrap">
+  <Chapter
+    number={1}
+    title="Displacement tripled"
+    chartTitle="Displacement rose every year; Net change moved further below zero"
+    chartSubtitle={`Share of workforce, quarterly average across ${countryCount} countries`}
+    explorerQuery={explorerQuery({})}
+  >
+    <p>{text.displacement}</p>
+    <p>{text.netChange}</p>
+    <p slot="definition">
+      <b>Displacement</b> is the gross share of a Sector's workforce whose roles were lost to AI in a
+      quarter. <b>Net change</b> offsets it with the new roles AI created; negative means more lost than
+      created.
+    </p>
+    <DisplacementLines slot="chart" />
+    <Fragment slot="source">
+      Shaded bands mark the two periods compared; the figures in them are each period's average.
+    </Fragment>
+  </Chapter>
+
+  <Chapter
+    number={2}
+    title="The Sector gap"
+    chartTitle="Displacement by Sector"
+    chartSubtitle="Share of workforce, average of the latest four quarters"
+    explorerQuery={explorerQuery({ sector: facts.topSector.sector })}
+  >
+    <p>{text.topSector}</p>
+    <p>{text.lowSectors}</p>
+    <SectorGapBars slot="chart" />
+  </Chapter>
+
+  <Chapter
+    number={3}
+    title="Rich countries lose more but recover more"
+    chartTitle="Displacement and Replacement rate both rise with income"
+    chartSubtitle="By World Bank income group, average of the latest four quarters"
+    explorerQuery={explorerQuery({ metric: 'replacement-rate' })}
+  >
+    <p>{text.incomeDisplacement}</p>
+    <p>{text.incomeReplacement}</p>
+    <p slot="definition">
+      <b>Replacement rate</b> is the number of new roles AI created for every 100 roles displaced.
+    </p>
+    <IncomeGroupBars slot="chart" />
+    <Fragment slot="source">{text.incomeSource}</Fragment>
+  </Chapter>
+
+  <Chapter
+    number={4}
+    title="Women in clerical work"
+    chartTitle="One Sector stands apart"
+    chartSubtitle="Women's share of the workforce and of displaced roles, by Sector"
+    explorerQuery={explorerQuery(WOMEN_FINDING_LINK)}
+  >
+    <p>{text.women}</p>
+    <p>{text.otherSectors}</p>
+    <WomenShareDots slot="chart" />
+    <Fragment slot="source">{text.womenSource}</Fragment>
+  </Chapter>
+</div>

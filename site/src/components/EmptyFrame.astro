@@ -1,0 +1,40 @@
+---
+// A sized, labelled empty frame that stands in for a chart or view until its ticket fills the slot.
+// It holds the layout at the size the real thing will take, so nothing jumps when it arrives.
+interface Props {
+  /** What will go here, in a few words. */
+  label: string;
+  /** Width over height of the frame, as CSS: "500 / 285". */
+  ratio?: string;
+  /** A fixed height instead of a ratio, for strips such as the slider: "3rem". */
+  height?: string;
+}
+
+const { label, ratio = '16 / 9', height } = Astro.props;
+const size = height ? `height:${height}` : `aspect-ratio:${ratio}`;
+---
+
+<div class="empty-frame" style={size} data-empty-frame>
+  <span class="caps">{label}</span>
+</div>
+
+<style>
+  .empty-frame {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    padding: var(--space-3);
+    border: 1px dashed var(--chart-neutral);
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent 0 10px,
+      color-mix(in srgb, var(--chart-grid) 55%, transparent) 10px 11px
+    );
+    color: var(--color-faint);
+    text-align: center;
+  }
+  .caps {
+    padding: var(--space-1) var(--space-2);
+    background: var(--chart-bg);
+  }
+</style>

@@ -1,0 +1,202 @@
+---
+// Headline finding 4's chart: one pair of dots per Sector, women's share of the workforce (hollow)
+// and of displaced roles (filled), with the gap between them written out and the clerical Sector
+// emphasised. Static SVG, drawn at build time.
+import { scaleLinear } from 'd3-scale';
+import { findings } from '../data/findings';
+import { CLERICAL_SECTOR } from './facts';
+import { pointGap, signedPoints, wholeShare } from './format';
+import './chart.css';
+
+// Highest share of displaced roles first.
+const sectors = [...findings.women].sort((a, b) => b.displaced - a.displaced);
+const TICKS = [0, 0.25, 0.5, 0.75, 1];
+const RADIUS = 4.5;
+
+// Wide: Sector names in a column to the left of the dots. Narrow: each name on its own line above
+// its dots.
+const sizes = [
+  { name: 'wide', width: 640, stacked: false, plotLeft: 208, plotRight: 548, head: 30, row: 27 },
+  { name: 'narrow', width: 320, stacked: true, plotLeft: 10, plotRight: 284, head: 50, row: 41 },
+];
+
+function draw(size: (typeof sizes)[number]) {
+  const { width, stacked, plotLeft, plotRight, head, row } = size;
+  const x = scaleLinear().domain([0, 1]).range([plotLeft, plotRight]);
+  const rowsBottom = head + sectors.length * row;
+
+  return {
+    ...size,
+    height: rowsBottom + 24,
+    rowsBottom,
+    ticks: TICKS.map((tick) => ({ x: x(tick), label: wholeShare(tick) })),
+    // The key: on one line when wide, on two when narrow.
+    key: stacked
+      ? { workforce: { x: 6, y: 10 }, displaced: { x: 6, y: 28 } }
+      : { workforce: { x: plotLeft, y: 10 }, displaced: { x: plotLeft + 160, y: 10 } },
+    rows: sectors.map((sector, index) => {
+      const top = head + index * row;
+      const trackY = stacked ? top + 28 : top + row / 2;
+      return {
+        sector: sector.sector,
+        emphasised: sector.sector === CLERICAL_SECTOR,
+        labelX: stacked ? 0 : plotLeft - 16,
+        labelY: stacked ? top + 13 : trackY,
+        labelAnchor: stacked ? 'start' : 'end',
+        labelDy: stacked ? '0' : '0.35em',
+        gap: signedPoints(pointGap(sector.workforce, sector.displaced)),
+        gapX: width,
+        gapY: stacked ? top + 13 : trackY,
+        gapDy: stacked ? '0' : '0.35em',
+        trackY,
+        workforceX: x(sector.workforce),
+        displacedX: x(sector.displaced),
+        workforce: wholeShare(sector.workforce),
+        displaced: wholeShare(sector.displaced),
+      };
+    }),
+  };
+}
+
+const charts = sizes.map(draw);
+---
+
+<div class="fc">
+  {
+    charts.map((c) => (
+      <svg class={`fc-${c.name}`} viewBox={`0 0 ${c.width} ${c.height}`} aria-hidden="true">
+        <circle class="fc-dot-hollow" cx={c.key.workforce.x + 5} cy={c.key.workforce.y} r={RADIUS} />
+        <text x={c.key.workforce.x + 16} y={c.key.workforce.y} dy="0.35em">
+          Share of workforce
+        </text>
+        <circle class="fc-dot" cx={c.key.displaced.x + 5} cy={c.key.displaced.y} r={RADIUS} />
+        <text x={c.key.displaced.x + 16} y={c.key.displaced.y} dy="0.35em">
+          Share of displaced roles
+        </text>
+        <text class="fc-muted" x={c.width} y={c.key.workforce.y} dy="0.35em" text-anchor="end">
+          Gap
+        </text>
+
+        {c.rows.map((row) => (
+          <>
+            {c.stacked ? (
+              <line
+                class="fc-grid"
+                x1={c.plotLeft}
+                x2={c.plotRight}
+                y1={row.trackY}
+                y2={row.trackY}
+              />
+            ) : null}
+            {c.stacked
+              ? c.ticks.map((tick) => (
+                  <line
+                    class="fc-grid"
+                    x1={tick.x}
+                    x2={tick.x}
+                    y1={row.trackY - 5}
+                    y2={row.trackY + 5}
+                  />
+                ))
+              : null}
+          </>
+        ))}
+        {c.stacked
+          ? null
+          : c.ticks.map((tick) => (
+              <line class="fc-grid" x1={tick.x} x2={tick.x} y1={c.head} y2={c.rowsBottom} />
+            ))}
+        {c.ticks.map((tick) => (
+          <text class="fc-muted" x={tick.x} y={c.rowsBottom + 17} text-anchor="middle">
+            {tick.label}
+          </text>
+        ))}
+
+        {c.rows.map((row) => (
+          <>
+            <text
+              class={row.emphasised ? 'fc-strong' : ''}
+              x={row.labelX}
+              y={row.labelY}
+              dy={row.labelDy}
+              text-anchor={row.labelAnchor}
+            >
+              {row.sector}
+            </text>
+            <text
+              class={row.emphasised ? 'fc-strong' : ''}
+              x={row.gapX}
+              y={row.gapY}
+              dy={row.gapDy}
+              text-anchor="end"
+            >
+              {row.gap}
+            </text>
+            <line
+              class={row.emphasised ? 'fc-line fc-mark-1' : 'fc-line'}
+              x1={row.workforceX}
+              x2={row.displacedX}
+              y1={row.trackY}
+              y2={row.trackY}
+            />
+            <circle
+              class={row.emphasised ? 'fc-dot-hollow fc-mark-1' : 'fc-dot-hollow'}
+              cx={row.workforceX}
+              cy={row.trackY}
+              r={RADIUS}
+            />
+            <circle
+              class={row.emphasised ? 'fc-dot fc-mark-1' : 'fc-dot'}
+              cx={row.displacedX}
+              cy={row.trackY}
+              r={RADIUS}
+            />
+            {row.emphasised && (
+              <>
+                <text
+                  class="fc-series-1 fc-halo"
+                  x={row.workforceX - 10}
+                  y={row.trackY}
+                  dy="0.35em"
+                  text-anchor="end"
+                >
+                  {row.workforce}
+                </text>
+                <text class="fc-series-1 fc-halo" x={row.displacedX + 10} y={row.trackY} dy="0.35em">
+                  {row.displaced}
+                </text>
+              </>
+            )}
+          </>
+        ))}
+      </svg>
+    ))
+  }
+
+  <table class="visually-hidden">
+    <caption>
+      Women's share of each Sector's workforce and of its displaced roles, and the gap between them in
+      percentage points.
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Sector</th>
+        <th scope="col">Share of workforce</th>
+        <th scope="col">Share of displaced roles</th>
+        <th scope="col">Gap</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        sectors.map((sector) => (
+          <tr>
+            <th scope="row">{sector.sector}</th>
+            <td>{wholeShare(sector.workforce)}</td>
+            <td>{wholeShare(sector.displaced)}</td>
+            <td>{signedPoints(pointGap(sector.workforce, sector.displaced))}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

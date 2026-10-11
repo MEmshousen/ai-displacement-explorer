@@ -1,0 +1,77 @@
+name: Deploy site to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# The minimum the official Pages actions need: read the repo, publish to Pages,
+# and mint the OIDC token that deploy-pages uses to prove where the build came from.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time. A newer run waits for the one in progress rather
+# than cancelling it, so a deployment is never cut off halfway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      SITE_BASE: /ai-displacement-explorer
+      SITE_URL: https://memshousen.github.io
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      # ------------------------------------------------------------------
+      # DATA STEP GOES HERE (added by a later ticket).
+      # Turn the repo's CSV into the files the site reads, before the site
+      # is built. If it needs Python, add actions/setup-python just above it.
+      # ------------------------------------------------------------------
+
+      - name: Install dependencies
+        working-directory: site
+        run: npm ci
+
+      - name: Type check
+        working-directory: site
+        run: npm run check
+
+      - name: Test
+        working-directory: site
+        run: npm test
+
+      - name: Build
+        working-directory: site
+        run: npm run build
+
+      - name: Upload the Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,108 @@
+---
+// The Explorer: the handover band, then the tinted panel holding the Selection sentence and
+// the three views it drives; see site/README.md.
+import QuarterSlider from '../explorer/map/QuarterSlider.astro';
+import WorldMap from '../explorer/map/WorldMap.astro';
+import HandoverBand from './HandoverBand.astro';
+import SelectionSentence from '../explorer/sentence/SelectionSentence.astro';
+import ViewPane from './ViewPane.astro';
+import TrendChart from '../explorer/trend/TrendChart.astro';
+import SectorBars from '../explorer/sectors/SectorBars.astro';
+---
+
+<section id="explorer" aria-labelledby="explorer-heading">
+  <HandoverBand headingId="explorer-heading" />
+
+  <div class="panel">
+    <div class="wrap">
+      {/* REGION sentence: the Selection as a sentence with clickable words. The only control. */}
+      <div class="sentence" id="explorer-sentence" data-region="sentence">
+        <SelectionSentence />
+      </div>
+
+      <div class="views">
+        {/* REGION map: the world map, with the quarter slider in its controls slot. */}
+        <ViewPane
+          region="map"
+          title="World map"
+          subtitle="The chosen metric, by country"
+        >
+          <WorldMap />
+          <div slot="controls" id="explorer-slider" data-region="slider">
+            <QuarterSlider />
+          </div>
+        </ViewPane>
+
+        <div class="side">
+          {/* REGION trend: the selected country against the global average, over time. */}
+          <ViewPane
+            region="trend"
+            title="The global average over time"
+            subtitle="Displacement, all Sectors, 2020 Q1 to 2026 Q2"
+          >
+            <TrendChart />
+          </ViewPane>
+
+          {/* REGION sectors: the ten Sectors ranked for the chosen quarter. */}
+          <ViewPane
+            region="sectors"
+            title="Sector bars"
+            subtitle="The chosen metric for the ten Sectors, ranked"
+          >
+            <SectorBars />
+          </ViewPane>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .panel {
+    padding-block: 1.6rem var(--space-7);
+    border-bottom: 1px solid var(--color-ink);
+    background: var(--color-panel);
+  }
+
+  /* Type for the Selection sentence, inherited by whatever fills the region. */
+  .sentence {
+    margin-bottom: 1.3rem;
+    font-family: var(--font-serif);
+    font-size: var(--text-sentence);
+    line-height: 1.5;
+  }
+
+  /* Touch widths, and any touch screen: each line of the sentence is as tall as a finger needs, so
+     every clickable word is a 44px target and no two of them overlap. */
+  @media (max-width: 979px), (pointer: coarse) {
+    .sentence {
+      line-height: max(1.5em, 2.75rem);
+    }
+  }
+
+  /* Phone and small tablet: the map, then the trend chart, then the Sector bars, in one column. */
+  .views,
+  .side {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+  }
+  .side {
+    min-width: 0;
+  }
+
+  /* Tablet: the map full width, the two charts side by side under it. Not below 820px, where half
+     the panel would leave the trend chart's plot narrower than its own labels. */
+  @media (min-width: 820px) and (max-width: 979px) {
+    .side {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  /* Desktop: the map on the left, the two charts stacked on the right. */
+  @media (min-width: 980px) {
+    .views {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+</style>
