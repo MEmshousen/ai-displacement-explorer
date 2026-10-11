@@ -118,7 +118,6 @@ design tokens.
 ```
 .
 ├── ai_workforce_displacement_global_2020_2026.csv   the dataset
-├── eda_analysis.ipynb                               the earlier analysis notebook
 ├── docs/screenshots/                                the images in this README
 ├── .github/workflows/deploy.yml                     the GitHub Pages deploy
 └── site/                                            the Astro site
@@ -131,20 +130,6 @@ design tokens.
         ├── selection/                               the Selection, its metrics and its URL form
         └── explorer/                                the sentence, map, trend chart and Sector bars
 ```
-
-## The analysis notebook
-
-`eda_analysis.ipynb` is where the project started: an exploratory pass over the same CSV in Python
-with pandas and Plotly. It loads the data, prints summary tables, and draws nine charts (quarterly
-trends, Sector, region and income group comparisons).
-
-It is kept as a record and is not part of the site. The site does not read anything from it: the
-Headline findings above are computed separately by the data step. The notebook's closing "Key
-Findings" notes are a first impression written before that work and were not revised against it, so
-where the two differ, the site's figures are the current ones.
-
-To run it you need Python with `pandas` and `plotly`, and Jupyter. The repo has no requirements
-file for it.
 
 ## How this was made
 
